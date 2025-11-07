@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:io'; // 👈 для визначення платформи
+import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -9,13 +9,11 @@ import 'screens/home_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔹 Перевіряємо, на якій платформі працюємо
   if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   }
 
-  // 🔹 Заповнюємо базу початковими даними
   await seedDatabase();
 
   runApp(const MyApp());
