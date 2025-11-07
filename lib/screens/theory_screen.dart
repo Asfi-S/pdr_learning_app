@@ -1,121 +1,85 @@
 import 'package:flutter/material.dart';
-import 'sections_details_screen.dart';
+import '../data/db_helper.dart';
 
-class TheoryScreen extends StatelessWidget {
+class TheoryScreen extends StatefulWidget {
   const TheoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final List<Map<String, String>> sections = [
-      {'title': 'Розділ 1. Загальні положення',
-        'description': 'Основні терміни, визначення і принципи дорожнього руху.'},
-      {'title': 'Розділ 2. Обов’язки і права водіїв механічних транспортних засобів',
-        'description': 'Права водія, його обов’язки та відповідальність.'},
-      {'title': 'Розділ 3. Обов’язки і права водіїв транспортних засобів із спеціальними сигналами',
-        'description': 'Порядок руху спецтранспорту з маячками й сиренами.'},
-      {'title': 'Розділ 4. Рух транспортних засобів',
-        'description': 'Загальні правила руху, вимоги до смуг і напрямків.'},
-      {'title': 'Розділ 5. Обов’язки і права пішоходів',
-        'description': 'Поведінка пішоходів, переходи, безпека руху.'},
-      {'title': 'Розділ 6. Обов’язки і права пасажирів',
-        'description': 'Правила поведінки пасажирів у транспорті.'},
-      {'title': 'Розділ 7. Вимоги до велосипедистів',
-        'description': 'Основи безпечного руху для осіб, що керують велосипедами.'},
-      {'title': 'Розділ 8. Вимоги до осіб, які керують гужовим транспортом і тваринами',
-        'description': 'Регулювання руху возів, упряжних і верхових тварин.'},
-      {'title': 'Розділ 9. Регулювання дорожнього руху',
-        'description': 'Світлофори, регулювальники, знаки пріоритету.'},
-      {'title': 'Розділ 10. Попереджувальні сигнали',
-        'description': 'Сигнали рукою, звукові й світлові попередження.'},
-      {'title': 'Розділ 11. Початок руху та зміна його напрямку',
-        'description': 'Правила початку руху, обгону, розвороту.'},
-      {'title': 'Розділ 12. Розташування транспортних засобів на дорозі',
-        'description': 'Вибір смуги руху та правила об’їзду перешкод.'},
-      {'title': 'Розділ 13. Швидкість руху',
-        'description': 'Обмеження швидкості, дистанція, безпечна реакція.'},
-      {'title': 'Розділ 14. Дистанція, інтервал, зустрічний роз’їзд',
-        'description': 'Правила утримання відстані між транспортом.'},
-      {'title': 'Розділ 15. Обгін',
-        'description': 'Коли дозволено або заборонено обгін.'},
-      {'title': 'Розділ 16. Зупинка і стоянка',
-        'description': 'Правила тимчасової зупинки й стоянки транспортних засобів.'},
-      {'title': 'Розділ 17. Проїзд перехресть',
-        'description': 'Пріоритети, сигнали, порядок руху через перехрестя.'},
-      {'title': 'Розділ 18. Проїзд маршрутних транспортних засобів',
-        'description': 'Перевага громадського транспорту на смугах руху.'},
-      {'title': 'Розділ 19. Проїзд пішохідних переходів і зупинок транспорту',
-        'description': 'Безпечний проїзд біля зупинок і переходів.'},
-      {'title': 'Розділ 20. Користування зовнішніми світловими приладами',
-        'description': 'Фари, ближнє/дальнє світло, денні ходові вогні.'},
-      {'title': 'Розділ 21. Рух через залізничні переїзди',
-        'description': 'Порядок проїзду переїздів, заборони та сигнали.'},
-      {'title': 'Розділ 22. Перевезення пасажирів',
-        'description': 'Вимоги до безпечного перевезення людей.'},
-      {'title': 'Розділ 23. Перевезення вантажів',
-        'description': 'Закріплення вантажу, маса, габарити, обмеження.'},
-      {'title': 'Розділ 24. Буксирування і експлуатація транспортних составів',
-        'description': 'Правила буксирування, вимоги до тросів і техніки безпеки.'},
-      {'title': 'Розділ 25. Навчальна їзда',
-        'description': 'Вимоги до навчальних транспортних засобів і учнів.'},
-      {'title': 'Розділ 26. Рух транспортних засобів у колонах',
-        'description': 'Організація групового руху транспортних засобів.'},
-      {'title': 'Розділ 27. Рух у житловій та пішохідній зоні',
-        'description': 'Правила руху в дворах і зонах з пішоходами.'},
-      {'title': 'Розділ 28. Рух по автомагістралях і дорогах для автомобілів',
-        'description': 'Особливості руху на швидкісних трасах.'},
-      {'title': 'Розділ 29. Рух по гірських дорогах і крутих спусках',
-        'description': 'Рекомендації для водіння у складних умовах.'},
-      {'title': 'Розділ 30. Міжнародний рух',
-        'description': 'Правила для транспортних засобів, що перетинають кордони.'},
-      {'title': 'Розділ 31. Номери, розпізнавальні знаки, написи і позначення',
-        'description': 'Регламент розміщення номерів та ідентифікаційних знаків.'},
-      {'title': 'Розділ 32. Технічний стан транспортних засобів',
-        'description': 'Вимоги до технічної справності автомобіля.'},
-      {'title': 'Розділ 33. Окремі питання дорожнього руху, що потребують узгодження',
-        'description': 'Організація руху при ремонтних роботах чи аваріях.'},
-      {'title': 'Розділ 34. Дорожня розмітка',
-        'description': 'Типи, кольори і значення ліній на проїзній частині.'},
-    ];
+  State<TheoryScreen> createState() => _TheoryScreenState();
+}
 
+class _TheoryScreenState extends State<TheoryScreen> {
+  final DBHelper db = DBHelper();
+  List<Map<String, dynamic>> sections = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSections();
+  }
+
+  Future<void> _loadSections() async {
+    final data = await db.getSections();
+    setState(() {
+      sections = data;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Теорія ПДР'),
         backgroundColor: Colors.redAccent,
-        foregroundColor: Colors.white,
       ),
-      body: ListView.builder(
+      body: sections.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: sections.length,
         itemBuilder: (context, index) {
           final section = sections[index];
           return Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
             margin: const EdgeInsets.symmetric(vertical: 8),
-            elevation: 3,
             child: ListTile(
-              contentPadding: const EdgeInsets.all(16),
-              title: Text(
-                section['title']!,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                section['description']!,
-                style: const TextStyle(fontSize: 15, height: 1.4),
-              ),
-              trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+              title: Text(section['title']),
+              subtitle: Text(section['description']),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => SectionDetailsScreen(title: section['title']!),
+                    builder: (_) => SectionDetailsScreen(
+                      title: section['title'],
+                      content: section['content'],
+                    ),
                   ),
                 );
               },
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class SectionDetailsScreen extends StatelessWidget {
+  final String title;
+  final String content;
+
+  const SectionDetailsScreen({
+    super.key,
+    required this.title,
+    required this.content,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text(content),
       ),
     );
   }

@@ -35,7 +35,9 @@ class SectionDetailsScreen extends StatelessWidget {
       case 'Розділ 4. Рух транспортних засобів':
         return _buildPlaceholder('Розділ 4. Рух транспортних засобів');
       case 'Розділ 5. Обов’язки і права пішоходів':
-        return _buildPlaceholder('Розділ 5. Обов’язки і права пішоходів');
+        return _buildPlac￼Change your avatar
+￼
+eholder('Розділ 5. Обов’язки і права пішоходів');
       default:
         return _buildPlaceholder(title);
     }
