@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:sqflite_common/sqlite_api.dart';
 import 'data/seed_data.dart';
 import 'screens/home_screen.dart';
 
@@ -14,7 +13,12 @@ void main() async {
     databaseFactory = databaseFactoryFfi;
   }
 
+  final dbPath = await getDatabasesPath();
+  await deleteDatabase('$dbPath/pdr_learning.db');
+  print('🗑️ Стара база видалена');
+
   await seedDatabase();
+  print('✅ База створена і заповнена');
 
   runApp(const MyApp());
 }
