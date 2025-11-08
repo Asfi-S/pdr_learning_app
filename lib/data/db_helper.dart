@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+
 class DBHelper {
   static Database? _db;
 
@@ -12,7 +13,7 @@ class DBHelper {
 
   Future<Database> _initDB() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'pdr_learning.db'); // назва файлу бази
+    final path = join(dbPath, 'pdr_learning.db');
 
     return await openDatabase(
       path,
@@ -29,6 +30,12 @@ class DBHelper {
       },
     );
   }
+  /*Future<void> clearSections() async {
+    final db = await database;
+    await db.delete('sections');
+  }*/
+
+
 
   Future<void> insertSection(Map<String, dynamic> section) async {
     final db = await database;

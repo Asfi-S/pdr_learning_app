@@ -1,7 +1,18 @@
 import 'db_helper.dart';
+Future<void> clearSections() async {
+}
 
 Future<void> seedDatabase() async {
   final db = DBHelper();
+  //await db.clearSections();
+
+  final existingSections = await db.getSections();
+
+  if (existingSections.isNotEmpty) {
+    print('✅ Дані вже існують — пропускаємо seed.');
+    return;
+  }
+
 
   final sections = [
     {
