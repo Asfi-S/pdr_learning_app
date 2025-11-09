@@ -22,8 +22,8 @@ Future<void> seedDatabase() async {
         },
         {
           'number': '1.2',
-          'text':
-          'В Україні встановлено правосторонній рух транспортних засобів.'
+          'text': 'В Україні встановлено правосторонній рух транспортних засобів.',
+          'imagePath': 'assets/images/right_drive.jpg'
         },
         {
           'number': '1.3',
@@ -41,9 +41,12 @@ Future<void> seedDatabase() async {
 
   for (var section in sections) {
     final fixedSection = Map<String, dynamic>.from(section);
-    fixedSection['content'] = jsonEncode(section['content']);
+    final content = section['content'];
+
+    fixedSection['content'] = jsonEncode(content);
+
     await db.insertSection(fixedSection);
   }
 
-  print('✅ База заповнена правильно!');
+  print('🎉 База заповнена правильно!');
 }

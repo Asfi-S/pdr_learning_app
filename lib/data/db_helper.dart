@@ -21,9 +21,9 @@ class DBHelper {
         await db.execute('''
           CREATE TABLE sections (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            description TEXT,
-            content TEXT
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            content TEXT NOT NULL
           )
         ''');
       },
@@ -37,6 +37,10 @@ class DBHelper {
 
   Future<void> insertSection(Map<String, dynamic> section) async {
     final db = await database;
+
+    print('🧠 Вставляю у базу секцію: ${section['title']}');
+    print('📦 Контент: ${section['content']}\n');
+
     await db.insert(
       'sections',
       section,
