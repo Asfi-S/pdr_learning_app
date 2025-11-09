@@ -121,12 +121,38 @@ class _HomeScreenState extends State<HomeScreen>
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Розділ тестів у розробці 🚧'),
+                          content: Text('🚧 Розділ «Тестування» у розробці'),
                           backgroundColor: Colors.redAccent,
                         ),
                       );
                     },
                   ),
+                  const SizedBox(height: 20),
+
+                  _buildMainButton(
+                    context,
+                    icon: Icons.traffic_rounded,
+                    text: 'Дорожні знаки',
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('🚧 Розділ «Дорожні знаки» у розробці'),
+                          backgroundColor: Colors.redAccent,
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 40),
+
+                  const Text(
+                    '© 2025 Asfinian Studio',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                      fontStyle: FontStyle.normal,
+                    ),
+                  ),
+
                 ],
               ),
             ),
