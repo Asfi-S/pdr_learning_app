@@ -101,18 +101,12 @@ class _TheoryScreenState extends State<TheoryScreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          PageRouteBuilder(
-                            transitionDuration:
-                            const Duration(milliseconds: 400),
-                            pageBuilder: (_, __, ___) =>
-                                SectionDetailsScreen(
-                                  title: section['title'],
-                                  description: section['description'],
-                                  content: section['content'],
-                                ),
-                            transitionsBuilder: (_, anim, __, child) =>
-                                FadeTransition(
-                                    opacity: anim, child: child),
+                          MaterialPageRoute(
+                            builder: (_) => SectionDetailsScreen(
+                              title: section['title'],
+                              description: section['description'],
+                              content: section['content'],
+                            ),
                           ),
                         );
                       },
@@ -152,6 +146,7 @@ class _TheoryScreenState extends State<TheoryScreen> {
   }
 }
 
+/// 🧠 Деталі розділу
 class SectionDetailsScreen extends StatelessWidget {
   final String title;
   final String description;
@@ -165,12 +160,34 @@ class SectionDetailsScreen extends StatelessWidget {
   });
 
   List<Map<String, dynamic>> _parseContent(String raw) {
+    dynamic decoded = raw;
+
     try {
-      final first = jsonDecode(raw);
-      if (first is List) return List<Map<String, dynamic>>.from(first);
-      if (first is String) return List<Map<String, dynamic>>.from(jsonDecode(first));
-    } catch (_) {}
-    return [{'number': '', 'text': raw}];
+      int attempts = 0;
+      while (decoded is String && attempts < 5) {
+        decoded = decoded.trim();
+        if (decoded.startsWith('[') || decoded.startsWith('{')) {
+          decoded = jsonDecode(decoded);
+        } else {
+          break;
+        }
+        attempts++;
+      }
+
+      if (decoded is List) {
+        return decoded.map<Map<String, dynamic>>((item) {
+          if (item is Map<String, dynamic>) return item;
+          if (item is Map) return Map<String, dynamic>.from(item);
+          return {'number': '', 'text': item.toString(), 'imagePath': ''};
+        }).toList();
+      }
+    } catch (e) {
+      debugPrint('❌ JSON parse error: $e');
+    }
+
+    return [
+      {'number': '', 'text': raw, 'imagePath': ''}
+    ];
   }
 
   @override
@@ -206,6 +223,7 @@ class SectionDetailsScreen extends StatelessWidget {
           ...parsed.map((item) {
             final number = item['number']?.toString() ?? '';
             final text = item['text']?.toString() ?? '';
+            final imagePath = item['imagePath']?.toString() ?? '';
 
             return Card(
               margin: const EdgeInsets.symmetric(vertical: 8),
@@ -214,7 +232,8 @@ class SectionDetailsScreen extends StatelessWidget {
               ),
               elevation: 3,
               child: ExpansionTile(
-                tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                tilePadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 title: Text(
                   number.isNotEmpty ? 'Пункт $number' : 'Текст розділу',
                   style: const TextStyle(
@@ -223,14 +242,31 @@ class SectionDetailsScreen extends StatelessWidget {
                   ),
                 ),
                 children: [
+                  if (imagePath.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          imagePath,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: Colors.grey[300],
+                            height: 150,
+                            alignment: Alignment.center,
+                            child: const Text(
+                              '⚠️ Зображення не знайдено',
+                              style: TextStyle(color: Colors.redAccent),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   Padding(
                     padding: const EdgeInsets.all(16),
                     child: Text(
                       text,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        height: 1.5,
-                      ),
+                      style: const TextStyle(fontSize: 16, height: 1.5),
                     ),
                   ),
                 ],
