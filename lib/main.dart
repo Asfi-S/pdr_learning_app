@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'data/seed_data.dart';
@@ -13,28 +13,42 @@ void main() async {
     databaseFactory = databaseFactoryFfi;
   }
 
-  final dbPath = await getDatabasesPath();
-  await deleteDatabase('$dbPath/pdr_learning.db');
-  print('🗑️ Стара база видалена');
-
   await seedDatabase();
-  print('✅ База створена і заповнена');
 
-  runApp(const MyApp());
+  // ✅ контролер теми (глобальний)
+  final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.light);
+
+  runApp(MyApp(themeNotifier: themeNotifier));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final ValueNotifier<ThemeMode> themeNotifier;
+  const MyApp({super.key, required this.themeNotifier});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: Colors.redAccent,
-        useMaterial3: true,
-      ),
-      home: const HomeScreen(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, mode, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'ПДР Навчання',
+          themeMode: mode,
+          theme: ThemeData(
+            colorSchemeSeed: Colors.redAccent,
+            brightness: Brightness.light,
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            colorSchemeSeed: Colors.redAccent,
+            brightness: Brightness.dark,
+            useMaterial3: true,
+          ),
+          home: HomeScreen(
+            themeNotifier: themeNotifier,
+          ),
+        );
+      },
     );
   }
 }
