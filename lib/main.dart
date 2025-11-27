@@ -4,7 +4,7 @@ import 'theme/pdr_theme.dart';
 // Screens
 import 'screens/home_screen.dart';
 import 'screens/theory_screen.dart';
-import 'screens/test_screen.dart';
+import 'screens/test_menu_screen.dart';   // 🔥 НОВИЙ
 import 'screens/traffic_signs_screen.dart';
 import 'screens/sections_details_screen.dart';
 
@@ -35,22 +35,29 @@ class _PDRAppState extends State<PDRApp> {
       title: 'Вивчення ПДР',
       debugShowCheckedModeBanner: false,
 
+      // Теми
       theme: PdrTheme.light,
       darkTheme: PdrTheme.dark,
       themeMode: _isDark ? ThemeMode.dark : ThemeMode.light,
 
       initialRoute: '/',
 
+
       routes: {
         '/': (_) => HomeScreen(
           toggleTheme: toggleTheme,
           isDark: _isDark,
         ),
+
         '/theory': (_) => const TheoryScreen(),
-        '/test': (_) => const TestScreen(),
+
+        // 🔥 Тепер це меню тестування!
+        '/test': (_) => const TestMenuScreen(),
+
         '/signs': (_) => const TrafficSignsScreen(),
       },
 
+      // екрани з аргументами
       onGenerateRoute: (settings) {
         if (settings.name == '/section_details') {
           final args = settings.arguments;
@@ -61,6 +68,7 @@ class _PDRAppState extends State<PDRApp> {
             );
           }
         }
+
         return null;
       },
     );

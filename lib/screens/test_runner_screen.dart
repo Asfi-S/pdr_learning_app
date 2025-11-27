@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import '../models/test_question_model.dart';
+import 'dart:async';
 
 class TestRunnerScreen extends StatefulWidget {
   final List<TestQuestionModel> questions;
+  final bool examMode; // 🔥 Додаємо параметр
 
-  const TestRunnerScreen({super.key, required this.questions});
+  const TestRunnerScreen({
+    super.key,
+    required this.questions,
+    this.examMode = false, // за замовчуванням тренувальний режим
+  });
 
   @override
   State<TestRunnerScreen> createState() => _TestRunnerScreenState();
@@ -16,6 +22,46 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
   int correct = 0;
   bool answered = false;
 
+  Timer? timer;
+  int timeLeft = 120; // лише для екзамена
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 🔥 Таймер запускається ТІЛЬКИ якщо examMode = true
+    if (widget.examMode) {
+      startTimer();
+    }
+  }
+
+  void startTimer() {
+    timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (timeLeft == 0) {
+        timer?.cancel();
+        _finishTest();
+      } else {
+        setState(() => timeLeft--);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  void _finishTest() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            _ResultScreen(total: widget.questions.length, right: correct),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -24,6 +70,19 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Питання ${index + 1}/${widget.questions.length}"),
+
+        // 🔥 Показуємо таймер тільки в екзаменаційному режимі
+        actions: widget.examMode
+            ? [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text(
+              _formatTime(timeLeft),
+              style: const TextStyle(fontSize: 20),
+            ),
+          )
+        ]
+            : [],
       ),
 
       body: Padding(
@@ -31,12 +90,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-            /// ❓ ПИТАННЯ
-            Text(
-              q.question,
-              style: theme.textTheme.titleLarge,
-            ),
+            Text(q.question, style: theme.textTheme.titleLarge),
             const SizedBox(height: 16),
 
             if (q.imagePath != null)
@@ -47,13 +101,13 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
 
             const SizedBox(height: 20),
 
-            /// 🟦 ВАРІАНТИ ВІДПОВІДЕЙ
             ...List.generate(q.answers.length, (i) {
               Color? tile = theme.cardColor;
 
               if (answered) {
                 if (i == q.correctIndex) tile = Colors.green.shade400;
-                if (selected == i && selected != q.correctIndex) tile = Colors.red.shade400;
+                if (selected == i && selected != q.correctIndex)
+                  tile = Colors.red.shade400;
               }
 
               return Container(
@@ -63,35 +117,29 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  title: Text(q.answers[i], style: theme.textTheme.bodyLarge),
+                  title: Text(q.answers[i]),
                   onTap: answered
                       ? null
-                      : () {
-                    setState(() {
-                      selected = i;
-                    });
-                  },
+                      : () => setState(() => selected = i),
                 ),
               );
             }),
 
             const Spacer(),
 
-            /// 🔘 КНОПКА ДАЛІ / ЗАВЕРШИТИ
             ElevatedButton(
               onPressed: selected == null
                   ? null
                   : () {
                 if (!answered) {
                   answered = true;
-                  if (selected == q.correctIndex) {
-                    correct++;
-                  }
+
+                  if (selected == q.correctIndex) correct++;
+
                   setState(() {});
                   return;
                 }
 
-                /// 👉 Перейти до наступного питання
                 if (index < widget.questions.length - 1) {
                   setState(() {
                     index++;
@@ -99,16 +147,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
                     answered = false;
                   });
                 } else {
-                  /// 👉 Показати результат
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => _ResultScreen(
-                        total: widget.questions.length,
-                        right: correct,
-                      ),
-                    ),
-                  );
+                  timer?.cancel();
+                  _finishTest();
                 }
               },
               child: Text(
@@ -125,6 +165,12 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
       ),
     );
   }
+
+  String _formatTime(int sec) {
+    final m = (sec ~/ 60).toString().padLeft(2, '0');
+    final s = (sec % 60).toString().padLeft(2, '0');
+    return "$m:$s";
+  }
 }
 
 class _ResultScreen extends StatelessWidget {
@@ -135,7 +181,6 @@ class _ResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final percent = (right / total * 100).round();
 
     return Scaffold(
@@ -144,17 +189,11 @@ class _ResultScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              "$right / $total",
-              style: theme.textTheme.titleLarge!.copyWith(fontSize: 42),
-            ),
+            Text("$right / $total",
+                style: const TextStyle(fontSize: 42)),
             const SizedBox(height: 12),
-            Text(
-              "Результат: $percent%",
-              style: theme.textTheme.bodyLarge,
-            ),
+            Text("Результат: $percent%"),
             const SizedBox(height: 40),
-
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
               child: const Text("Повернутися"),
