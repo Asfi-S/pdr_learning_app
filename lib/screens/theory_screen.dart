@@ -29,6 +29,7 @@ class _TheoryScreenState extends State<TheoryScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Теорія ПДР')),
+
       body: sections.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
@@ -38,21 +39,11 @@ class _TheoryScreenState extends State<TheoryScreen> {
           final s = sections[i];
 
           return Card(
-            color: theme.cardColor,
-            elevation: 3,
-            shadowColor: theme.shadowColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
+            margin: const EdgeInsets.only(bottom: 14),
             child: ListTile(
-              title: Text(
-                s.title,
-                style: theme.textTheme.titleLarge,
-              ),
-              subtitle: Text(
-                s.description,
-                style: theme.textTheme.bodyMedium,
-              ),
+              title: Text(s.title, style: theme.textTheme.titleLarge),
+              subtitle: Text(s.description,
+                  style: theme.textTheme.bodyMedium),
               trailing: Icon(Icons.arrow_forward_ios_rounded,
                   color: theme.colorScheme.onSurface),
               onTap: () => Navigator.pushNamed(

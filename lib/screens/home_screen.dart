@@ -17,8 +17,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fade;
+  late Animation<Offset> _slide;
 
   @override
   void initState() {
@@ -29,16 +29,10 @@ class _HomeScreenState extends State<HomeScreen>
       duration: const Duration(milliseconds: 1200),
     );
 
-    _fadeAnimation =
-        CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.15),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+    _slide = Tween(begin: const Offset(0, 0.15), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
   }
@@ -58,41 +52,43 @@ class _HomeScreenState extends State<HomeScreen>
         title: const Text("Вивчення ПДР"),
         actions: [
           IconButton(
-            icon: Icon(widget.isDark ? Icons.dark_mode : Icons.light_mode),
+            icon: Icon(
+              widget.isDark ? Icons.dark_mode : Icons.light_mode,
+            ),
             onPressed: widget.toggleTheme,
           )
         ],
       ),
 
-      /// 🔥 Адаптивний фон (тема → градієнт)
       body: Container(
         width: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: theme.brightness == Brightness.dark
                 ? const [Color(0xFF10101F), Color(0xFF181829)]
-                : const [Color(0xFFFFE9E9), Color(0xFFFFF5F5)],
+                : const [Color(0xFFFFECEC), Color(0xFFFFF6F6)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
         ),
+
         child: SafeArea(
           child: FadeTransition(
-            opacity: _fadeAnimation,
+            opacity: _fade,
             child: SlideTransition(
-              position: _slideAnimation,
+              position: _slide,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset('assets/images/pdr_logo.png',
                       width: 120, height: 120),
 
+                  const SizedBox(height: 16),
+
                   Text(
-                    'Вивчення ПДР',
+                    "Вивчення ПДР",
                     style: theme.textTheme.titleLarge!.copyWith(
                       fontSize: 34,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
                       shadows: const [
                         Shadow(
                           blurRadius: 8,
@@ -105,32 +101,23 @@ class _HomeScreenState extends State<HomeScreen>
 
                   const SizedBox(height: 40),
 
-                  _button(
-                    icon: Icons.menu_book_rounded,
-                    text: 'Теорія ПДР',
-                    route: '/theory',
-                  ),
+                  _btn(Icons.menu_book_rounded, "Теорія ПДР", "/theory"),
                   const SizedBox(height: 20),
 
-                  _button(
-                    icon: Icons.quiz_rounded,
-                    text: 'Тестування',
-                    route: '/test',
-                  ),
+                  _btn(Icons.quiz_rounded, "Тестування", "/test"),
                   const SizedBox(height: 20),
 
-                  _button(
-                    icon: Icons.traffic_rounded,
-                    text: 'Дорожні знаки',
-                    route: '/signs',
-                  ),
+                  _btn(Icons.traffic_rounded, "Дорожні знаки", "/signs"),
 
                   const SizedBox(height: 60),
+
                   Text(
-                    '© 2025 Asfinian Studio',
-                    style: theme.textTheme.bodyMedium!
-                        .copyWith(fontSize: 12, color: Colors.grey),
-                  ),
+                    "© 2025 Asfinian Studio",
+                    style: theme.textTheme.bodyMedium!.copyWith(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  )
                 ],
               ),
             ),
@@ -140,16 +127,12 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _button({
-    required IconData icon,
-    required String text,
-    required String route,
-  }) {
+  Widget _btn(IconData icon, String text, String route) {
     final theme = Theme.of(context);
 
     return ElevatedButton.icon(
       onPressed: () => Navigator.pushNamed(context, route),
-      icon: Icon(icon, size: 24),
+      icon: Icon(icon, size: 22),
       label: Text(text, style: const TextStyle(fontSize: 18)),
       style: ElevatedButton.styleFrom(
         backgroundColor: theme.colorScheme.primary,

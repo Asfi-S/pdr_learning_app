@@ -20,7 +20,7 @@ class SectionDetailsScreen extends StatelessWidget {
           children: [
             _header(section.description, theme),
             const SizedBox(height: 20),
-            ...section.theory.map((item) => _item(item, theme)),
+            ...section.theory.map((t) => _item(t, theme)),
           ],
         ),
       ),
@@ -43,31 +43,28 @@ class SectionDetailsScreen extends StatelessWidget {
 
   Widget _item(TheoryItem item, ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border(
-          left: BorderSide(
-            color: theme.colorScheme.primary,
-            width: 4,
-          ),
-        ),
+        border: Border(left: BorderSide(
+          color: theme.colorScheme.primary,
+          width: 4,
+        )),
         boxShadow: [
           BoxShadow(
             color: theme.shadowColor.withOpacity(0.25),
             blurRadius: 6,
+            offset: const Offset(1,2),
           )
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${item.number}.  ${item.title}',
-            style: theme.textTheme.titleLarge,
-          ),
+          Text("${item.number}. ${item.title}",
+              style: theme.textTheme.titleLarge),
           const SizedBox(height: 8),
           Text(
             item.text,

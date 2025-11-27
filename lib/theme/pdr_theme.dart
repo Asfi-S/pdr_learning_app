@@ -21,19 +21,16 @@ class PdrTheme {
       elevation: 0,
     ),
 
-
-    // КАРТОЧКИ
-    cardColor: Colors.white,
-    cardTheme: CardThemeData(
+    cardTheme: const CardThemeData(
       color: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      elevation: 3,
       shadowColor: Colors.black12,
-      elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(14)),
       ),
     ),
 
-    // КНОПКИ
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFFFF7A7A),
@@ -49,7 +46,10 @@ class PdrTheme {
     textTheme: const TextTheme(
       bodyMedium: TextStyle(color: Colors.black87),
       bodyLarge: TextStyle(color: Colors.black),
-      titleLarge: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+      titleLarge: TextStyle(
+        color: Colors.black,
+        fontWeight: FontWeight.bold,
+      ),
     ),
   );
 
@@ -74,19 +74,16 @@ class PdrTheme {
       elevation: 0,
     ),
 
-
-    // КАРТОЧКИ
-    cardColor: Color(0xFF1A1A28),
-    cardTheme: CardThemeData(
+    cardTheme: const CardThemeData(
       color: Color(0xFF1A1A28),
-      shadowColor: Colors.black54,
+      surfaceTintColor: Colors.transparent,
       elevation: 5,
+      shadowColor: Colors.black54,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(14)),
       ),
     ),
 
-    // КНОПКИ
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF27273A),
@@ -103,7 +100,10 @@ class PdrTheme {
     textTheme: const TextTheme(
       bodyMedium: TextStyle(color: Colors.white70),
       bodyLarge: TextStyle(color: Colors.white),
-      titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      titleLarge: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
     ),
   );
 }
