@@ -1,11 +1,28 @@
-import 'test_answer_model.dart';
-
 class TestQuestionModel {
+  final String id;
+  final String sectionId;
   final String question;
-  final List<TestAnswerModel> answers;
+  final List<String> answers;
+  final int correctIndex;
+  final String? imagePath;
 
   TestQuestionModel({
+    required this.id,
+    required this.sectionId,
     required this.question,
     required this.answers,
+    required this.correctIndex,
+    this.imagePath,
   });
+
+  factory TestQuestionModel.fromJson(Map<String, dynamic> json) {
+    return TestQuestionModel(
+      id: json["id"].toString(),
+      sectionId: json["sectionId"].toString(),
+      question: json["question"],
+      answers: List<String>.from(json["answers"]),
+      correctIndex: json["correctIndex"],
+      imagePath: json["imagePath"],
+    );
+  }
 }
