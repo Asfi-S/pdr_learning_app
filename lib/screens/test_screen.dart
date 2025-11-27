@@ -7,7 +7,12 @@ class TestScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Тестування')),
-      body: const Center(child: Text('Тут будуть питання.')),
+      body: const Center(
+        child: Text(
+          'Тут будуть тести.',
+          style: TextStyle(fontSize: 18),
+        ),
+      ),
     );
   }
 }
