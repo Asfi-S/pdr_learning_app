@@ -1,15 +1,21 @@
+import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../models/test_question_model.dart';
-import 'dart:async';
+import '../widgets/speedometer_result.dart';
 
 class TestRunnerScreen extends StatefulWidget {
+  final String title;
   final List<TestQuestionModel> questions;
-  final bool examMode; // 🔥 Додаємо параметр
+  final bool withTimer;
+  final int? timeLimitSeconds;
 
   const TestRunnerScreen({
     super.key,
+    required this.title,
     required this.questions,
-    this.examMode = false, // за замовчуванням тренувальний режим
+    required this.withTimer,
+    this.timeLimitSeconds,
   });
 
   @override
@@ -22,23 +28,24 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
   int correct = 0;
   bool answered = false;
 
-  Timer? timer;
-  int timeLeft = 120; // лише для екзамена
+  Timer? _timer;
+  late int timeLeft;
 
   @override
   void initState() {
     super.initState();
 
-    // 🔥 Таймер запускається ТІЛЬКИ якщо examMode = true
-    if (widget.examMode) {
-      startTimer();
+    timeLeft = widget.timeLimitSeconds ?? 0;
+
+    if (widget.withTimer && widget.timeLimitSeconds != null) {
+      _startTimer();
     }
   }
 
-  void startTimer() {
-    timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (timeLeft == 0) {
-        timer?.cancel();
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (timeLeft <= 0) {
+        t.cancel();
         _finishTest();
       } else {
         setState(() => timeLeft--);
@@ -48,7 +55,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
 
   @override
   void dispose() {
-    timer?.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -56,8 +63,11 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            _ResultScreen(total: widget.questions.length, right: correct),
+        builder: (_) => _ResultScreen(
+          title: widget.title,
+          total: widget.questions.length,
+          right: correct,
+        ),
       ),
     );
   }
@@ -69,97 +79,125 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Питання ${index + 1}/${widget.questions.length}"),
-
-        // 🔥 Показуємо таймер тільки в екзаменаційному режимі
-        actions: widget.examMode
-            ? [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Text(
-              _formatTime(timeLeft),
-              style: const TextStyle(fontSize: 20),
+        title: Text("${widget.title}: ${index + 1}/${widget.questions.length}"),
+        actions: [
+          if (widget.withTimer && widget.timeLimitSeconds != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Center(
+                child: Text(
+                  _formatTime(timeLeft),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
             ),
-          )
-        ]
-            : [],
+        ],
       ),
 
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(q.question, style: theme.textTheme.titleLarge),
+            // Прогрес тесту
+            LinearProgressIndicator(
+              value: (index + 1) / widget.questions.length,
+              minHeight: 6,
+              backgroundColor: theme.colorScheme.primary.withOpacity(0.15),
+            ),
+
             const SizedBox(height: 16),
 
-            if (q.imagePath != null)
+            // Питання
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(q.question, style: theme.textTheme.titleLarge),
+            ),
+
+            const SizedBox(height: 12),
+
+            if (q.imagePath != null) ...[
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.asset(q.imagePath!),
               ),
+              const SizedBox(height: 16),
+            ],
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
 
-            ...List.generate(q.answers.length, (i) {
-              Color? tile = theme.cardColor;
+            // Відповіді
+            Expanded(
+              child: ListView.builder(
+                itemCount: q.answers.length,
+                itemBuilder: (_, i) {
+                  Color tileColor = theme.cardColor;
+                  Color borderColor = Colors.transparent;
 
-              if (answered) {
-                if (i == q.correctIndex) tile = Colors.green.shade400;
-                if (selected == i && selected != q.correctIndex)
-                  tile = Colors.red.shade400;
-              }
+                  if (answered) {
+                    if (i == q.correctIndex) {
+                      tileColor = Colors.green.shade400;
+                      borderColor = Colors.green.shade700;
+                    } else if (selected == i) {
+                      tileColor = Colors.red.shade400;
+                      borderColor = Colors.red.shade700;
+                    }
+                  }
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  tileColor: tile,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  title: Text(q.answers[i]),
-                  onTap: answered
-                      ? null
-                      : () => setState(() => selected = i),
-                ),
-              );
-            }),
-
-            const Spacer(),
-
-            ElevatedButton(
-              onPressed: selected == null
-                  ? null
-                  : () {
-                if (!answered) {
-                  answered = true;
-
-                  if (selected == q.correctIndex) correct++;
-
-                  setState(() {});
-                  return;
-                }
-
-                if (index < widget.questions.length - 1) {
-                  setState(() {
-                    index++;
-                    selected = null;
-                    answered = false;
-                  });
-                } else {
-                  timer?.cancel();
-                  _finishTest();
-                }
-              },
-              child: Text(
-                answered
-                    ? (index == widget.questions.length - 1
-                    ? "Завершити"
-                    : "Далі")
-                    : "Вибрати",
-                style: const TextStyle(fontSize: 18),
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: ListTile(
+                      tileColor: tileColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        side: BorderSide(color: borderColor, width: 2),
+                      ),
+                      title: Text(q.answers[i], style: theme.textTheme.bodyLarge),
+                      onTap: answered ? null : () => setState(() => selected = i),
+                    ),
+                  );
+                },
               ),
-            )
+            ),
+
+            const SizedBox(height: 8),
+
+            // Кнопка
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: selected == null
+                    ? null
+                    : () {
+                  if (!answered) {
+                    setState(() {
+                      answered = true;
+                      if (selected == q.correctIndex) correct++;
+                    });
+                    return;
+                  }
+
+                  if (index < widget.questions.length - 1) {
+                    setState(() {
+                      index++;
+                      selected = null;
+                      answered = false;
+                    });
+                  } else {
+                    _timer?.cancel();
+                    _finishTest();
+                  }
+                },
+                child: Text(
+                  !answered
+                      ? 'Вибрати'
+                      : (index == widget.questions.length - 1 ? 'Завершити' : 'Далі'),
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -173,32 +211,47 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
   }
 }
 
+// ------------------------------
+// РЕЗУЛЬТАТ
+// ------------------------------
+
 class _ResultScreen extends StatelessWidget {
+  final String title;
   final int total;
   final int right;
 
-  const _ResultScreen({required this.total, required this.right});
+  const _ResultScreen({
+    required this.title,
+    required this.total,
+    required this.right,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final percent = (right / total * 100).round();
 
     return Scaffold(
       appBar: AppBar(title: const Text("Результат тесту")),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("$right / $total",
-                style: const TextStyle(fontSize: 42)),
-            const SizedBox(height: 12),
-            Text("Результат: $percent%"),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Повернутися"),
-            )
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(title, style: theme.textTheme.titleLarge),
+              const SizedBox(height: 20),
+
+              SpeedometerResult(percent: percent),
+
+              const SizedBox(height: 40),
+
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Повернутися"),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,12 +1,21 @@
 import 'dart:convert';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import '../models/test_question_model.dart';
 
 class PdrTestsLoader {
-  static Future<List<TestQuestionModel>> loadTests() async {
-    final jsonString = await rootBundle.loadString('assets/pdr/tests.json');
-    final List data = json.decode(jsonString);
+  static const String _testsPath = 'assets/pdr/tests.json';
 
-    return data.map((e) => TestQuestionModel.fromJson(e)).toList();
+  /// Завантажити всі питання з JSON
+  static Future<List<TestQuestionModel>> loadAll() async {
+    final raw = await rootBundle.loadString(_testsPath);
+    final List list = json.decode(raw) as List;
+
+    return list.map((e) => TestQuestionModel.fromJson(e)).toList();
+  }
+
+  /// (на майбутнє) Завантажити питання по розділу
+  static Future<List<TestQuestionModel>> loadBySection(String sectionId) async {
+    final all = await loadAll();
+    return all.where((e) => e.sectionId == sectionId).toList();
   }
 }

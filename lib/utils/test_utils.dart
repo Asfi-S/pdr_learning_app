@@ -2,47 +2,32 @@ import 'dart:math';
 import '../models/test_question_model.dart';
 
 class TestUtils {
-  /// Перемішує питання. Якщо examMode=true — повертає 20 випадкових.
+  /// Перемішати список питань (нічого більше не робить)
   static List<TestQuestionModel> randomizeQuestions(
-      List<TestQuestionModel> list, {
-        bool examMode = false,
-      }) {
+      List<TestQuestionModel> list,
+      ) {
     final rng = Random();
-
-    // Створюємо копію, щоб не псувати оригінал
     final items = List<TestQuestionModel>.from(list);
-
-    // Перемішуємо
     items.shuffle(rng);
-
-    // Якщо режим екзамену — беремо 20
-    if (examMode) {
-      return items.take(20).toList();
-    }
-
     return items;
   }
 
-  /// Перемішує відповіді, зберігаючи правильну
+  /// Перемішати відповіді в одному питанні
   static TestQuestionModel randomizeAnswers(TestQuestionModel q) {
     final rng = Random();
-
     final answers = List<String>.from(q.answers);
-    final correctAnswer = answers[q.correctIndex];
+    final correctIndex = q.correctIndex;
 
-    // Перемішуємо відповіді
+    final correctAnswer = answers[correctIndex];
     answers.shuffle(rng);
+    final newIndex = answers.indexOf(correctAnswer);
 
-    // Знаходимо новий індекс правильної відповіді
-    final newCorrectIndex = answers.indexOf(correctAnswer);
-
-    // ПОВЕРТАЄМО ОНОВЛЕНУ МОДЕЛЬ
     return TestQuestionModel(
-      id: q.id,                   // ← додано
-      sectionId: q.sectionId,     // ← додано
+      id: q.id,
+      sectionId: q.sectionId,
       question: q.question,
       answers: answers,
-      correctIndex: newCorrectIndex,
+      correctIndex: newIndex,
       imagePath: q.imagePath,
     );
   }

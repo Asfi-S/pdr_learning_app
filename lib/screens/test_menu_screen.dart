@@ -1,95 +1,127 @@
 import 'package:flutter/material.dart';
 import '../data/pdr_tests_loader.dart';
 import '../models/test_question_model.dart';
+import '../utils/test_utils.dart';
 import 'test_runner_screen.dart';
 
-class TestMenuScreen extends StatefulWidget {
+class TestMenuScreen extends StatelessWidget {
   const TestMenuScreen({super.key});
 
-  @override
-  State<TestMenuScreen> createState() => _TestMenuScreenState();
-}
+  Future<void> _startTraining(BuildContext context) async {
+    final all = await PdrTestsLoader.loadAll();
 
-class _TestMenuScreenState extends State<TestMenuScreen> {
-  List<TestQuestionModel> questions = [];
-  bool loading = true;
+    final randomized = TestUtils.randomizeQuestions(all)
+        .map(TestUtils.randomizeAnswers)
+        .toList();
 
-  @override
-  void initState() {
-    super.initState();
-    _load();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TestRunnerScreen(
+          title: 'Тренувальний режим',
+          questions: randomized,
+          withTimer: false, //❗ без таймера
+          timeLimitSeconds: null,
+        ),
+      ),
+    );
   }
 
-  Future<void> _load() async {
-    questions = await PdrTestsLoader.loadTests();
-    setState(() => loading = false);
+  Future<void> _startExam(BuildContext context) async {
+    final all = await PdrTestsLoader.loadAll();
+
+    final randomized = TestUtils.randomizeQuestions(all)
+        .take(20) // 20 випадкових
+        .map(TestUtils.randomizeAnswers)
+        .toList();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TestRunnerScreen(
+          title: 'Екзаменаційний режим',
+          questions: randomized,
+          withTimer: true,   //❗ з таймером
+          timeLimitSeconds: 1200, // 20 хвилин (можеш змінити)
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface.withOpacity(0.7);
+
+    Widget buildCard({
+      required String title,
+      required String subtitle,
+      required IconData icon,
+      required VoidCallback onTap,
+    }) {
+      return Card(
+        color: theme.cardColor,
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: theme.colorScheme.primary.withOpacity(0.15),
+                  child: Icon(icon, color: theme.colorScheme.primary),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: theme.textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(subtitle,
+                          style: theme.textTheme.bodyMedium!
+                              .copyWith(color: onSurface)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Тестування")),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
+      appBar: AppBar(title: const Text('Тестування ПДР')),
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        children: [
-          _modeCard(
-            theme,
-            title: "Тренувальний режим",
-            subtitle: "Всі питання підряд, без таймера",
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => TestRunnerScreen(
-                  questions: questions,
-                  examMode: false,
-                ),
-              ),
+        child: Column(
+          children: [
+            buildCard(
+              title: 'Тренувальний режим',
+              subtitle: 'Всі питання підряд, без таймера',
+              icon: Icons.school_rounded,
+              onTap: () => _startTraining(context),
             ),
-          ),
-          const SizedBox(height: 16),
-          _modeCard(
-            theme,
-            title: "Екзамен",
-            subtitle: "20 випадкових питань + таймер",
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => TestRunnerScreen(
-                  questions: _random20(),
-                  examMode: true,
-                ),
-              ),
+            const SizedBox(height: 12),
+            buildCard(
+              title: 'Екзаменаційний режим',
+              subtitle: '20 випадкових питань, з таймером',
+              icon: Icons.timer_rounded,
+              onTap: () => _startExam(context),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Випадкові 20 питань
-  List<TestQuestionModel> _random20() {
-    questions.shuffle();
-    return questions.take(20).toList();
-  }
-
-  Widget _modeCard(
-      ThemeData t, {
-        required String title,
-        required String subtitle,
-        required VoidCallback onTap,
-      }) {
-    return Card(
-      color: t.cardColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        title: Text(title, style: t.textTheme.titleLarge),
-        subtitle: Text(subtitle),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded),
-        onTap: onTap,
+          ],
+        ),
       ),
     );
   }
