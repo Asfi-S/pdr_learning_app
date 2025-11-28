@@ -124,19 +124,31 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
 
             const SizedBox(height: 8),
 
-            // Відповіді
+            // -------------------------------
+            // ВІДПОВІДІ (оновлено!)
+            // -------------------------------
             Expanded(
               child: ListView.builder(
                 itemCount: q.answers.length,
                 itemBuilder: (_, i) {
+                  final isSelected = selected == i;
+                  final isCorrect = i == q.correctIndex;
+
                   Color tileColor = theme.cardColor;
                   Color borderColor = Colors.transparent;
 
-                  if (answered) {
-                    if (i == q.correctIndex) {
+                  if (!answered) {
+                    // Показуємо вибір ДО підтвердження
+                    if (isSelected) {
+                      tileColor = theme.colorScheme.primary.withOpacity(0.15);
+                      borderColor = theme.colorScheme.primary;
+                    }
+                  } else {
+                    // Після відповіді — зелена/червона
+                    if (isCorrect) {
                       tileColor = Colors.green.shade400;
                       borderColor = Colors.green.shade700;
-                    } else if (selected == i) {
+                    } else if (isSelected && !isCorrect) {
                       tileColor = Colors.red.shade400;
                       borderColor = Colors.red.shade700;
                     }
