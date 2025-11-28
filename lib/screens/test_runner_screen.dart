@@ -34,7 +34,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
   @override
   void initState() {
     super.initState();
-
     timeLeft = widget.timeLimitSeconds ?? 0;
 
     if (widget.withTimer && widget.timeLimitSeconds != null) {
@@ -96,18 +95,16 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
             ),
         ],
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Прогрес тесту
+            // Прогрес по питаннях
             LinearProgressIndicator(
               value: (index + 1) / widget.questions.length,
               minHeight: 6,
               backgroundColor: theme.colorScheme.primary.withOpacity(0.15),
             ),
-
             const SizedBox(height: 16),
 
             // Питання
@@ -115,7 +112,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
               alignment: Alignment.centerLeft,
               child: Text(q.question, style: theme.textTheme.titleLarge),
             ),
-
             const SizedBox(height: 12),
 
             if (q.imagePath != null) ...[
@@ -154,8 +150,13 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
                         borderRadius: BorderRadius.circular(14),
                         side: BorderSide(color: borderColor, width: 2),
                       ),
-                      title: Text(q.answers[i], style: theme.textTheme.bodyLarge),
-                      onTap: answered ? null : () => setState(() => selected = i),
+                      title: Text(
+                        q.answers[i],
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                      onTap: answered
+                          ? null
+                          : () => setState(() => selected = i),
                     ),
                   );
                 },
@@ -164,7 +165,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
 
             const SizedBox(height: 8),
 
-            // Кнопка
+            // Кнопка "Вибрати / Далі / Завершити"
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -193,7 +194,9 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
                 child: Text(
                   !answered
                       ? 'Вибрати'
-                      : (index == widget.questions.length - 1 ? 'Завершити' : 'Далі'),
+                      : (index == widget.questions.length - 1
+                      ? 'Завершити'
+                      : 'Далі'),
                   style: const TextStyle(fontSize: 18),
                 ),
               ),
@@ -212,7 +215,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
 }
 
 // ------------------------------
-// РЕЗУЛЬТАТ
+// ЕКРАН РЕЗУЛЬТАТУ
 // ------------------------------
 
 class _ResultScreen extends StatelessWidget {
@@ -234,18 +237,22 @@ class _ResultScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Результат тесту")),
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(title, style: theme.textTheme.titleLarge),
-              const SizedBox(height: 20),
+              Text(
+                title,
+                style: theme.textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
 
+              // Спідометр
               SpeedometerResult(percent: percent),
 
-              const SizedBox(height: 40),
-
+              const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text("Повернутися"),

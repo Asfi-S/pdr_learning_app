@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 
+/// Aira-style анімований, чистий, без артефактів спідометр.
 class SpeedometerResult extends StatefulWidget {
   final int percent;
 
@@ -21,12 +22,12 @@ class _SpeedometerResultState extends State<SpeedometerResult>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1600),
+      duration: const Duration(milliseconds: 1400),
     );
 
     _value = Tween<double>(
       begin: 0,
-      end: widget.percent.toDouble().clamp(0, 100),
+      end: widget.percent.clamp(0, 100).toDouble(),
     ).animate(
       CurvedAnimation(
         parent: _controller,
@@ -50,36 +51,36 @@ class _SpeedometerResultState extends State<SpeedometerResult>
     return AnimatedBuilder(
       animation: _value,
       builder: (_, __) {
-        final current = _value.value;
-        final color = _colorForPercent(current);
+        final v = _value.value;
+        final color = _colorFor(v);
 
         return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
-              width: 230,
-              height: 230,
+              width: 260,
+              height: 220,
               child: CustomPaint(
                 painter: _SpeedometerPainter(
-                  percent: current,
-                  accentColor: color,
+                  percent: v,
+                  color: color,
+                  isDark: theme.brightness == Brightness.dark,
                 ),
               ),
             ),
             const SizedBox(height: 16),
             Text(
-              '${current.toInt()}%',
+              "${v.toInt()}%",
               style: theme.textTheme.titleLarge?.copyWith(
-                fontSize: 40,
+                fontSize: 36,
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              _labelForPercent(current),
-              style: theme.textTheme.bodyMedium?.copyWith(fontSize: 16),
+              _labelFor(v),
               textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium,
             ),
           ],
         );
@@ -87,144 +88,81 @@ class _SpeedometerResultState extends State<SpeedometerResult>
     );
   }
 
-
-  Color _colorForPercent(double p) {
-    if (p >= 90) return const Color(0xFF6EFF45); // яскравий зелений
-    if (p >= 60) return Colors.amberAccent.shade200;
+  Color _colorFor(double p) {
+    if (p >= 90) return Colors.lightGreenAccent.shade400;
+    if (p >= 75) return Colors.orangeAccent;
     return Colors.redAccent;
   }
 
-  String _labelForPercent(double p) {
-    if (p >= 90) return 'Чудово! Ти майже готовий до іспиту.';
-    if (p >= 75) return 'Добре, але є що підтягнути.';
-    if (p >= 50) return 'Потрібно ще попрактикуватися.';
-    return 'Поки що слабувато — варто вчитись більше 😉';
+  String _labelFor(double p) {
+    if (p >= 90) return "Чудово! Ти майже готовий до іспиту.";
+    if (p >= 75) return "Добре, але є що підтягнути.";
+    if (p >= 50) return "Потрібно ще попрактикуватися.";
+    return "Поки що слабувато — вчитись ще 😉";
   }
 }
 
-
+/// Painter без артефактів, одна кольорова дуга, стрілка.
 class _SpeedometerPainter extends CustomPainter {
   final double percent;
-  final Color accentColor;
+  final Color color;
+  final bool isDark;
 
   _SpeedometerPainter({
     required this.percent,
-    required this.accentColor,
+    required this.color,
+    required this.isDark,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
+    final center = Offset(size.width / 2, size.height / 2 + 10);
     final radius = size.width / 2 - 24;
 
-    // 135° → 405° (діапазон)
-    final startAngle = pi * 0.75;
-    final sweepAngle = pi * 1.5;
+    const start = 3 * pi / 4;  // 135°
+    const sweep = 3 * pi / 2;  // 270°
+    final progress = sweep * (percent / 100);
 
-    // Фонова дуга
-    final bgPaint = Paint()
-      ..color = Colors.black12
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 18
-      ..strokeCap = StrokeCap.round;
+    final rect = Rect.fromCircle(center: center, radius: radius);
 
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      sweepAngle,
-      false,
-      bgPaint,
-    );
-
-
-    Shader shader;
-
-    if (percent >= 90) {
-      shader = SweepGradient(
-        startAngle: startAngle,
-        endAngle: startAngle + sweepAngle,
-        colors: [
-          accentColor,
-          accentColor.withOpacity(0.8),
-        ],
-        stops: const [0.0, 0.85],
-        transform: GradientRotation(startAngle),
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
-    } else {
-      shader = SweepGradient(
-        startAngle: startAngle,
-        endAngle: startAngle + sweepAngle,
-        colors: const [
-          Color(0xFFFF4B6E),
-          Color(0xFFFF8A4D),
-          Color(0xFFFFE46A),
-        ],
-        stops: const [0.0, 0.45, 0.80],
-        transform: GradientRotation(startAngle),
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
-    }
-
-    final progressPaint = Paint()
-      ..shader = shader
-      ..strokeWidth = 18
+    // Фон
+    final bg = Paint()
+      ..color = isDark ? Colors.white10 : Colors.black12
+      ..strokeWidth = 16
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    final progressAngle = sweepAngle * (percent / 100);
+    canvas.drawArc(rect, start, sweep, false, bg);
 
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      progressAngle,
-      false,
-      progressPaint,
-    );
-
-    final glowPaint = Paint()
-      ..color = accentColor.withOpacity(0.25)
-      ..strokeWidth = 28
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 25)
+    // Прогрес
+    final fg = Paint()
+      ..color = color
+      ..strokeWidth = 16
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      progressAngle,
-      false,
-      glowPaint,
-    );
+    canvas.drawArc(rect, start, progress, false, fg);
 
-    _drawNeedle(canvas, center, radius, startAngle, sweepAngle);
-
-    canvas.drawCircle(center, 4, Paint()..color = Colors.black26);
-    canvas.drawCircle(center, 2, Paint()..color = accentColor);
-  }
-
-  void _drawNeedle(Canvas canvas, Offset center, double radius,
-      double startAngle, double sweepAngle) {
-    final angle = startAngle + sweepAngle * (percent / 100);
+    // Стрілка
+    final angle = start + progress;
     final end = Offset(
-      center.dx + (radius - 12) * cos(angle),
-      center.dy + (radius - 12) * sin(angle),
+      center.dx + (radius - 10) * cos(angle),
+      center.dy + (radius - 10) * sin(angle),
     );
 
     final needle = Paint()
-      ..color = accentColor
+      ..color = color
       ..strokeWidth = 3;
 
-    final glow = Paint()
-      ..color = accentColor.withOpacity(0.55)
-      ..strokeWidth = 7
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
-
-    canvas.drawLine(center, end, glow);
     canvas.drawLine(center, end, needle);
+
+    // Центр
+    canvas.drawCircle(center, 5,
+        Paint()..color = isDark ? Colors.white24 : Colors.black26);
+    canvas.drawCircle(center, 3, Paint()..color = color);
   }
 
   @override
-  bool shouldRepaint(_SpeedometerPainter oldDelegate) {
-    return oldDelegate.percent != percent ||
-        oldDelegate.accentColor != accentColor;
-  }
+  bool shouldRepaint(covariant _SpeedometerPainter old) =>
+      old.percent != percent || old.color != color;
 }
