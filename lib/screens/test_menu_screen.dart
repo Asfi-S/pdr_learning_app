@@ -20,7 +20,7 @@ class TestMenuScreen extends StatelessWidget {
         builder: (_) => TestRunnerScreen(
           title: 'Тренувальний режим',
           questions: randomized,
-          withTimer: false, //❗ без таймера
+          withTimer: false, // без таймера
           timeLimitSeconds: null,
         ),
       ),
@@ -41,8 +41,8 @@ class TestMenuScreen extends StatelessWidget {
         builder: (_) => TestRunnerScreen(
           title: 'Екзаменаційний режим',
           questions: randomized,
-          withTimer: true,   //❗ з таймером
-          timeLimitSeconds: 1200, // 20 хвилин (можеш змінити)
+          withTimer: true,   // з таймером
+          timeLimitSeconds: 1200, // 20 хвилин
         ),
       ),
     );
