@@ -25,6 +25,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/pdr/
 
 flutter_launcher_icons:
   android: true

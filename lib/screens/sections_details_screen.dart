@@ -1,145 +1,83 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../models/section_model.dart';
+import '../models/theory_item.dart';
 
 class SectionDetailsScreen extends StatelessWidget {
-  final String title;
-  final String description;
-  final String content;
+  final SectionModel section;
 
-  const SectionDetailsScreen({
-    super.key,
-    required this.title,
-    required this.description,
-    required this.content,
-  });
-
-  /// 🧩 Розумний декодер — витягує вкладені JSON навіть 3 рівнів
-  List<Map<String, dynamic>> _parseContent(String raw) {
-    try {
-      dynamic decoded = raw;
-
-      int attempts = 0;
-      while (decoded is String && attempts < 5) {
-        decoded = decoded.trim();
-        if (decoded.startsWith('[') || decoded.startsWith('{')) {
-          decoded = jsonDecode(decoded);
-        } else {
-          break;
-        }
-        attempts++;
-      }
-
-      if (decoded is List) {
-        return decoded.map<Map<String, dynamic>>((item) {
-          if (item is Map) {
-            return {
-              'number': item['number'] ?? '',
-              'text': item['text'] ?? '',
-              'imagePath': item['imagePath'] ?? '',
-            };
-          }
-          return {'number': '', 'text': item.toString(), 'imagePath': ''};
-        }).toList();
-      }
-
-      if (decoded is Map) {
-        return [Map<String, dynamic>.from(decoded)];
-      }
-
-      debugPrint('⚠️ Невідомий формат: $decoded');
-    } catch (e, s) {
-      debugPrint('❌ JSON decode error: $e');
-      debugPrint('📜 Stack: $s');
-    }
-
-    return [
-      {'number': '', 'text': raw, 'imagePath': ''}
-    ];
-  }
-
-
-    return [
-      {'number': '', 'text': raw, 'imagePath': ''}
-    ];
-  }
+  const SectionDetailsScreen({super.key, required this.section});
 
   @override
   Widget build(BuildContext context) {
-    final items = _parseContent(content);
-    for (final i in items) {
-      debugPrint('🧩 ${i['number']} → ${i['imagePath']}');
-    }
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.red[50],
-      appBar: AppBar(
-        backgroundColor: Colors.redAccent,
-        foregroundColor: Colors.white,
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-      ),
-      body: Padding(
+      appBar: AppBar(title: Text(section.title)),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: ListView.builder(
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            final item = items[index];
-            final number = item['number'] ?? '';
-            final text = item['text'] ?? '';
-            final imagePath = (item['imagePath'] ?? '').trim();
-
-            return Card(
-              elevation: 4,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Пункт $number',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.redAccent,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-
-                    if (imagePath.isNotEmpty)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: const [
-                            BoxShadow(color: Colors.black26, blurRadius: 6)
-                          ],
-                        ),
-                        clipBehavior: Clip.hardEdge,
-                        child: Image.asset(
-                          imagePath,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: Colors.grey[300],
-                            padding: const EdgeInsets.all(12),
-                            alignment: Alignment.center,
-                            child: const Text(
-                              '⚠️ Зображення не знайдено',
-                              style: TextStyle(color: Colors.redAccent),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                    Text(text, style: const TextStyle(fontSize: 16, height: 1.5)),
-                  ],
-                ),
-              ),
-            );
-          },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _header(section.description, theme),
+            const SizedBox(height: 20),
+            ...section.theory.map((t) => _item(t, theme)),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _header(String text, ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Text(
+        text,
+        style: theme.textTheme.bodyLarge,
+      ),
+    );
+  }
+
+  Widget _item(TheoryItem item, ThemeData theme) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border(left: BorderSide(
+          color: theme.colorScheme.primary,
+          width: 4,
+        )),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withOpacity(0.25),
+            blurRadius: 6,
+            offset: const Offset(1,2),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("${item.number}. ${item.title}",
+              style: theme.textTheme.titleLarge),
+          const SizedBox(height: 8),
+          Text(
+            item.text,
+            style: theme.textTheme.bodyMedium!.copyWith(height: 1.5),
+          ),
+          if (item.imagePath != null) ...[
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.asset(item.imagePath!),
+            )
+          ],
+        ],
       ),
     );
   }

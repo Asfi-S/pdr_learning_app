@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'theory_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  final ValueNotifier<ThemeMode> themeNotifier;
+  final VoidCallback toggleTheme;
+  final bool isDark;
 
-  const HomeScreen({super.key, required this.themeNotifier});
+  const HomeScreen({
+    super.key,
+    required this.toggleTheme,
+    required this.isDark,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -13,8 +17,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fade;
+  late Animation<Offset> _slide;
 
   @override
   void initState() {
@@ -25,16 +29,10 @@ class _HomeScreenState extends State<HomeScreen>
       duration: const Duration(milliseconds: 1200),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.2),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _slide = Tween(begin: const Offset(0, 0.15), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
   }
@@ -47,50 +45,51 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    bool isDark = widget.themeNotifier.value == ThemeMode.dark;
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'ПДР — навчання',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.redAccent,
+        title: const Text("Вивчення ПДР"),
         actions: [
           IconButton(
             icon: Icon(
-              isDark ? Icons.light_mode : Icons.dark_mode,
-              color: Colors.white,
+              widget.isDark ? Icons.dark_mode : Icons.light_mode,
             ),
-            onPressed: () {
-              widget.themeNotifier.value =
-              isDark ? ThemeMode.light : ThemeMode.dark;
-            },
-          ),
+            onPressed: widget.toggleTheme,
+          )
         ],
       ),
-      body: SafeArea(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SlideTransition(
-            position: _slideAnimation,
-            child: Center(
+
+      body: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: theme.brightness == Brightness.dark
+                ? const [Color(0xFF10101F), Color(0xFF181829)]
+                : const [Color(0xFFFFECEC), Color(0xFFFFF6F6)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+
+        child: SafeArea(
+          child: FadeTransition(
+            opacity: _fade,
+            child: SlideTransition(
+              position: _slide,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/images/pdr_logo.png',
-                    width: 120,
-                    height: 120,
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Вивчення ПДР',
-                    style: TextStyle(
+                  Image.asset('assets/images/pdr_logo.png',
+                      width: 120, height: 120),
+
+                  const SizedBox(height: 16),
+
+                  Text(
+                    "Вивчення ПДР",
+                    style: theme.textTheme.titleLarge!.copyWith(
                       fontSize: 34,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.redAccent,
-                      shadows: [
+                      shadows: const [
                         Shadow(
                           blurRadius: 8,
                           offset: Offset(2, 2),
@@ -99,60 +98,26 @@ class _HomeScreenState extends State<HomeScreen>
                       ],
                     ),
                   ),
+
                   const SizedBox(height: 40),
 
-                  _buildMainButton(
-                    context,
-                    icon: Icons.menu_book_rounded,
-                    text: 'Теорія ПДР',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const TheoryScreen()),
-                      );
-                    },
-                  ),
+                  _btn(Icons.menu_book_rounded, "Теорія ПДР", "/theory"),
                   const SizedBox(height: 20),
 
-                  _buildMainButton(
-                    context,
-                    icon: Icons.quiz_rounded,
-                    text: 'Тестування',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('🚧 Розділ «Тестування» у розробці'),
-                          backgroundColor: Colors.redAccent,
-                        ),
-                      );
-                    },
-                  ),
+                  _btn(Icons.quiz_rounded, "Тестування", "/test"),
                   const SizedBox(height: 20),
 
-                  _buildMainButton(
-                    context,
-                    icon: Icons.traffic_rounded,
-                    text: 'Дорожні знаки',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('🚧 Розділ «Дорожні знаки» у розробці'),
-                          backgroundColor: Colors.redAccent,
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 40),
+                  _btn(Icons.traffic_rounded, "Дорожні знаки", "/signs"),
 
-                  const Text(
-                    '© 2025 Asfinian Studio',
-                    style: TextStyle(
+                  const SizedBox(height: 60),
+
+                  Text(
+                    "© 2025 Asfinian Studio",
+                    style: theme.textTheme.bodyMedium!.copyWith(
+                      fontSize: 12,
                       color: Colors.grey,
-                      fontSize: 14,
-                      fontStyle: FontStyle.normal,
                     ),
-                  ),
-
+                  )
                 ],
               ),
             ),
@@ -162,22 +127,20 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildMainButton(BuildContext context,
-      {required IconData icon,
-        required String text,
-        required VoidCallback onPressed}) {
+  Widget _btn(IconData icon, String text, String route) {
+    final theme = Theme.of(context);
+
     return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 24),
-      label: Text(
-        text,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
+      onPressed: () => Navigator.pushNamed(context, route),
+      icon: Icon(icon, size: 22),
+      label: Text(text, style: const TextStyle(fontSize: 18)),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.redAccent.shade100,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
         elevation: 6,
       ),
     );
