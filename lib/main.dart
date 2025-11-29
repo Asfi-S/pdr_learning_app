@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'theme/pdr_theme.dart';
 
-// Screens
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/history_screen.dart';
@@ -11,7 +10,6 @@ import 'screens/test_menu_screen.dart';
 import 'screens/traffic_signs_screen.dart';
 import 'screens/sections_details_screen.dart';
 
-// Models
 import 'models/section_model.dart';
 
 void main() {
@@ -55,7 +53,6 @@ class _PDRAppState extends State<PDRApp> {
 
   @override
   Widget build(BuildContext context) {
-    // Показуємо splash поки тема не прочиталась
     if (!_loaded) {
       return MaterialApp(
         home: Scaffold(
@@ -65,7 +62,7 @@ class _PDRAppState extends State<PDRApp> {
     }
 
     return MaterialApp(
-      title: "Вивчення ПДР",
+      title: "ПДР України 2025",
       debugShowCheckedModeBanner: false,
 
       theme: PdrTheme.light,

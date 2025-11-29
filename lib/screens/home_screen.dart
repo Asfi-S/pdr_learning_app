@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Вивчення ПДР"),
+        title: const Text("ПДР України 2025"),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -50,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen>
         ],
       ),
 
-      // 🔥 Гарний градієнтний фон
       body: Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -72,12 +71,12 @@ class _HomeScreenState extends State<HomeScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset("assets/images/pdr_logo.png", width: 130),
+                    Image.asset("assets/images/pdr_logo.png", width: 200),
                     const SizedBox(height: 20),
 
                     // Заголовок
                     Text(
-                      "Вивчення ПДР",
+                      "ПДР України 2025",
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
