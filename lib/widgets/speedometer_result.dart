@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class SpeedometerResult extends StatefulWidget {
-  final int percent;
+  final int percent; // 0–100
 
   const SpeedometerResult({super.key, required this.percent});
 
@@ -87,7 +87,6 @@ class _SpeedometerResultState extends State<SpeedometerResult>
     );
   }
 
-
   Color _colorForPercent(double p) {
     if (p >= 90) return const Color(0xFF6EFF45); // яскравий зелений
     if (p >= 60) return Colors.amberAccent.shade200;
@@ -101,7 +100,6 @@ class _SpeedometerResultState extends State<SpeedometerResult>
     return 'Поки що слабувато — варто вчитись більше 😉';
   }
 }
-
 
 class _SpeedometerPainter extends CustomPainter {
   final double percent;
@@ -117,9 +115,8 @@ class _SpeedometerPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2 - 24;
 
-    // 135° → 405° (діапазон)
-    final startAngle = pi * 0.75;
-    final sweepAngle = pi * 1.5;
+    final startAngle = pi * 0.75;  // 135°
+    final sweepAngle = pi * 1.5;   // 270°
 
     // Фонова дуга
     final bgPaint = Paint()
@@ -128,18 +125,20 @@ class _SpeedometerPainter extends CustomPainter {
       ..strokeWidth = 18
       ..strokeCap = StrokeCap.round;
 
+    final rect = Rect.fromCircle(center: center, radius: radius);
+
     canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
+      rect,
       startAngle,
       sweepAngle,
       false,
       bgPaint,
     );
 
-
+    // Прогрес-градієнт
     Shader shader;
-
     if (percent >= 90) {
+      // зелена зона — суцільний зелений, без “жопки”
       shader = SweepGradient(
         startAngle: startAngle,
         endAngle: startAngle + sweepAngle,
@@ -149,61 +148,70 @@ class _SpeedometerPainter extends CustomPainter {
         ],
         stops: const [0.0, 0.85],
         transform: GradientRotation(startAngle),
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
+      ).createShader(rect);
     } else {
       shader = SweepGradient(
         startAngle: startAngle,
         endAngle: startAngle + sweepAngle,
         colors: const [
-          Color(0xFFFF4B6E),
-          Color(0xFFFF8A4D),
-          Color(0xFFFFE46A),
+          Color(0xFFFF4B6E), // червоний
+          Color(0xFFFF8A4D), // оранжевий
+          Color(0xFFFFE46A), // жовтий
         ],
         stops: const [0.0, 0.45, 0.80],
         transform: GradientRotation(startAngle),
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
+      ).createShader(rect);
     }
 
     final progressPaint = Paint()
       ..shader = shader
       ..strokeWidth = 18
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap = StrokeCap.butt; // 🔥 плоский кінець — без жопки
 
     final progressAngle = sweepAngle * (percent / 100);
 
     canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
+      rect,
       startAngle,
       progressAngle,
       false,
       progressPaint,
     );
 
+    // Glow навколо дуги
     final glowPaint = Paint()
       ..color = accentColor.withOpacity(0.25)
-      ..strokeWidth = 28
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 25)
+      ..strokeWidth = 26
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22)
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap = StrokeCap.butt; // теж без округлення
 
     canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
+      rect,
       startAngle,
       progressAngle,
       false,
       glowPaint,
     );
 
+    // Стрілка
     _drawNeedle(canvas, center, radius, startAngle, sweepAngle);
 
+    // Центр
     canvas.drawCircle(center, 4, Paint()..color = Colors.black26);
     canvas.drawCircle(center, 2, Paint()..color = accentColor);
   }
 
-  void _drawNeedle(Canvas canvas, Offset center, double radius,
-      double startAngle, double sweepAngle) {
+  void _drawNeedle(
+      Canvas canvas,
+      Offset center,
+      double radius,
+      double startAngle,
+      double sweepAngle,
+      ) {
     final angle = startAngle + sweepAngle * (percent / 100);
+
     final end = Offset(
       center.dx + (radius - 12) * cos(angle),
       center.dy + (radius - 12) * sin(angle),

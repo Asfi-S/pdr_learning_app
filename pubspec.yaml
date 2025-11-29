@@ -10,9 +10,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  # Бази даних
   sqflite: ^2.3.2
   sqflite_common_ffi: ^2.3.0+4
   path_provider: ^2.1.2
+
+  # Історія тестів (SharedPrefs)
+  shared_preferences: ^2.2.2
+
+  # 🔥 Форматування дат (для HistoryScreen)
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:

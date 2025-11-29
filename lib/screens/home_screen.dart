@@ -1,14 +1,7 @@
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
-  final VoidCallback toggleTheme;
-  final bool isDark;
-
-  const HomeScreen({
-    super.key,
-    required this.toggleTheme,
-    required this.isDark,
-  });
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -30,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen>
     );
 
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-
     _slide = Tween(begin: const Offset(0, 0.15), end: Offset.zero)
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
@@ -52,14 +44,13 @@ class _HomeScreenState extends State<HomeScreen>
         title: const Text("Вивчення ПДР"),
         actions: [
           IconButton(
-            icon: Icon(
-              widget.isDark ? Icons.dark_mode : Icons.light_mode,
-            ),
-            onPressed: widget.toggleTheme,
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.pushNamed(context, "/settings"),
           )
         ],
       ),
 
+      // 🔥 Гарний градієнтний фон
       body: Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -77,48 +68,33 @@ class _HomeScreenState extends State<HomeScreen>
             opacity: _fade,
             child: SlideTransition(
               position: _slide,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset('assets/images/pdr_logo.png',
-                      width: 120, height: 120),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset("assets/images/pdr_logo.png", width: 130),
+                    const SizedBox(height: 20),
 
-                  const SizedBox(height: 16),
-
-                  Text(
-                    "Вивчення ПДР",
-                    style: theme.textTheme.titleLarge!.copyWith(
-                      fontSize: 34,
-                      shadows: const [
-                        Shadow(
-                          blurRadius: 8,
-                          offset: Offset(2, 2),
-                          color: Colors.black26,
-                        )
-                      ],
+                    // Заголовок
+                    Text(
+                      "Вивчення ПДР",
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 40),
+                    const SizedBox(height: 40),
 
-                  _btn(Icons.menu_book_rounded, "Теорія ПДР", "/theory"),
-                  const SizedBox(height: 20),
+                    _btn(Icons.menu_book_rounded, "Теорія ПДР", "/theory"),
+                    const SizedBox(height: 18),
 
-                  _btn(Icons.quiz_rounded, "Тестування", "/test"),
-                  const SizedBox(height: 20),
+                    _btn(Icons.quiz_rounded, "Тестування", "/test"),
+                    const SizedBox(height: 18),
 
-                  _btn(Icons.traffic_rounded, "Дорожні знаки", "/signs"),
-
-                  const SizedBox(height: 60),
-
-                  Text(
-                    "© 2025 Asfinian Studio",
-                    style: theme.textTheme.bodyMedium!.copyWith(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                  )
-                ],
+                    _btn(Icons.traffic_rounded, "Дорожні знаки", "/signs"),
+                  ],
+                ),
               ),
             ),
           ),

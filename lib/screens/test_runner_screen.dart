@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+
 import '../models/test_question_model.dart';
 import '../widgets/speedometer_result.dart';
+import '../data/history_manager.dart';
 
 class TestRunnerScreen extends StatefulWidget {
   final String title;
@@ -59,7 +61,19 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
     super.dispose();
   }
 
-  void _finishTest() {
+  Future<void> _finishTest() async {
+    // 🔥 ЗБЕРЕГАЄМО ІСТОРІЮ
+    await HistoryManager.add(
+      HistoryItem(
+        title: widget.title,
+        total: widget.questions.length,
+        right: correct,
+        percent: ((correct / widget.questions.length) * 100).round(),
+        date: DateTime.now(),
+      ),
+    );
+
+    // 🔥 ПЕРЕХІД НА ЕКРАН РЕЗУЛЬТАТУ
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -101,7 +115,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Прогрес тесту
             LinearProgressIndicator(
               value: (index + 1) / widget.questions.length,
               minHeight: 6,
@@ -110,7 +123,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
 
             const SizedBox(height: 16),
 
-            // Питання
             Align(
               alignment: Alignment.centerLeft,
               child: Text(q.question, style: theme.textTheme.titleLarge),
@@ -128,7 +140,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
 
             const SizedBox(height: 8),
 
-            // Відповіді
             Expanded(
               child: ListView.builder(
                 itemCount: q.answers.length,
@@ -136,6 +147,13 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
                   Color tileColor = theme.cardColor;
                   Color borderColor = Colors.transparent;
 
+                  // 🔥 ДО ВИБОРУ: показуємо яку відповідь вибрав користувач
+                  if (!answered && selected == i) {
+                    tileColor = theme.colorScheme.primary.withOpacity(0.20);
+                    borderColor = theme.colorScheme.primary;
+                  }
+
+                  // 🔥 ПІСЛЯ ВИБОРУ: зелений / червоний
                   if (answered) {
                     if (i == q.correctIndex) {
                       tileColor = Colors.green.shade400;
@@ -155,7 +173,9 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
                         side: BorderSide(color: borderColor, width: 2),
                       ),
                       title: Text(q.answers[i], style: theme.textTheme.bodyLarge),
-                      onTap: answered ? null : () => setState(() => selected = i),
+                      onTap: answered
+                          ? null
+                          : () => setState(() => selected = i),
                     ),
                   );
                 },
@@ -164,7 +184,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
 
             const SizedBox(height: 8),
 
-            // Кнопка
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -192,8 +211,10 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
                 },
                 child: Text(
                   !answered
-                      ? 'Вибрати'
-                      : (index == widget.questions.length - 1 ? 'Завершити' : 'Далі'),
+                      ? "Вибрати"
+                      : (index == widget.questions.length - 1
+                      ? "Завершити"
+                      : "Далі"),
                   style: const TextStyle(fontSize: 18),
                 ),
               ),
@@ -211,10 +232,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
   }
 }
 
-// ------------------------------
-// РЕЗУЛЬТАТ
-// ------------------------------
-
 class _ResultScreen extends StatelessWidget {
   final String title;
   final int total;
@@ -228,20 +245,20 @@ class _ResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final percent = (right / total * 100).round();
 
     return Scaffold(
       appBar: AppBar(title: const Text("Результат тесту")),
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(title, style: theme.textTheme.titleLarge),
+              Text(title, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 20),
 
+              // 🔥 Анімований спідометр
               SpeedometerResult(percent: percent),
 
               const SizedBox(height: 40),
