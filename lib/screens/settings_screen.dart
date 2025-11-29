@@ -62,7 +62,7 @@ class SettingsScreen extends StatelessWidget {
                   applicationVersion: "1.0.0",
                   children: const [
                     Text("Застосунок для вивчення Правил дорожнього руху."),
-                    Text("Розроблено Asfinian Studio © 2025"),
+                    Text("Розроблено Asfinian Studio™ © 2025"),
                   ],
                 );
               },
@@ -90,7 +90,7 @@ class SettingsScreen extends StatelessWidget {
 
           Center(
             child: Text(
-              "© 2025 Asfinian Studio",
+              "© 2025 Asfinian Studio™",
               style: theme.textTheme.bodyMedium!.copyWith(
                 fontSize: 12,
                 color: theme.brightness == Brightness.dark
