@@ -36,7 +36,6 @@ class _PDRAppState extends State<PDRApp> {
     _loadTheme();
   }
 
-  /// 🔥 Завантаження теми із SharedPreferences
   Future<void> _loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getBool("isDark") ?? false;
@@ -46,7 +45,6 @@ class _PDRAppState extends State<PDRApp> {
     });
   }
 
-  /// 🔥 Зміна теми + збереження
   void toggleTheme() async {
     final newValue = !_isDark;
     setState(() => _isDark = newValue);
@@ -70,15 +68,12 @@ class _PDRAppState extends State<PDRApp> {
       title: "Вивчення ПДР",
       debugShowCheckedModeBanner: false,
 
-      // Теми
       theme: PdrTheme.light,
       darkTheme: PdrTheme.dark,
       themeMode: _isDark ? ThemeMode.dark : ThemeMode.light,
 
-      // Головний екран
       home: const HomeScreen(),
 
-      // Маршрути
       routes: {
         "/settings": (_) => SettingsScreen(
           toggleTheme: toggleTheme,
@@ -90,7 +85,6 @@ class _PDRAppState extends State<PDRApp> {
         "/signs": (_) => const TrafficSignsScreen(),
       },
 
-      // Динамічні сторінки
       onGenerateRoute: (settings) {
         if (settings.name == "/section_details") {
           final args = settings.arguments;

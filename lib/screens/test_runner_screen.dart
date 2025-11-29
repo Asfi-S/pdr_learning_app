@@ -73,7 +73,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
       ),
     );
 
-    // 🔥 ПЕРЕХІД НА ЕКРАН РЕЗУЛЬТАТУ
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -258,7 +257,6 @@ class _ResultScreen extends StatelessWidget {
               Text(title, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 20),
 
-              // 🔥 Анімований спідометр
               SpeedometerResult(percent: percent),
 
               const SizedBox(height: 40),

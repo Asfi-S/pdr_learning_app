@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class SpeedometerResult extends StatefulWidget {
-  final int percent; // 0–100
+  final int percent;
 
   const SpeedometerResult({super.key, required this.percent});
 
@@ -118,7 +118,6 @@ class _SpeedometerPainter extends CustomPainter {
     final startAngle = pi * 0.75;  // 135°
     final sweepAngle = pi * 1.5;   // 270°
 
-    // Фонова дуга
     final bgPaint = Paint()
       ..color = Colors.black12
       ..style = PaintingStyle.stroke
@@ -135,10 +134,8 @@ class _SpeedometerPainter extends CustomPainter {
       bgPaint,
     );
 
-    // Прогрес-градієнт
     Shader shader;
     if (percent >= 90) {
-      // зелена зона — суцільний зелений, без “жопки”
       shader = SweepGradient(
         startAngle: startAngle,
         endAngle: startAngle + sweepAngle,
@@ -154,9 +151,9 @@ class _SpeedometerPainter extends CustomPainter {
         startAngle: startAngle,
         endAngle: startAngle + sweepAngle,
         colors: const [
-          Color(0xFFFF4B6E), // червоний
-          Color(0xFFFF8A4D), // оранжевий
-          Color(0xFFFFE46A), // жовтий
+          Color(0xFFFF4B6E),
+          Color(0xFFFF8A4D),
+          Color(0xFFFFE46A),
         ],
         stops: const [0.0, 0.45, 0.80],
         transform: GradientRotation(startAngle),
@@ -179,7 +176,6 @@ class _SpeedometerPainter extends CustomPainter {
       progressPaint,
     );
 
-    // Glow навколо дуги
     final glowPaint = Paint()
       ..color = accentColor.withOpacity(0.25)
       ..strokeWidth = 26
@@ -195,10 +191,8 @@ class _SpeedometerPainter extends CustomPainter {
       glowPaint,
     );
 
-    // Стрілка
     _drawNeedle(canvas, center, radius, startAngle, sweepAngle);
 
-    // Центр
     canvas.drawCircle(center, 4, Paint()..color = Colors.black26);
     canvas.drawCircle(center, 2, Paint()..color = accentColor);
   }
