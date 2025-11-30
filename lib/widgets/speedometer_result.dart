@@ -88,7 +88,7 @@ class _SpeedometerResultState extends State<SpeedometerResult>
   }
 
   Color _colorForPercent(double p) {
-    if (p >= 90) return const Color(0xFF6EFF45); // яскравий зелений
+    if (p >= 90) return const Color(0xFF6EFF45);
     if (p >= 60) return Colors.amberAccent.shade200;
     return Colors.redAccent;
   }
@@ -115,8 +115,8 @@ class _SpeedometerPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2 - 24;
 
-    final startAngle = pi * 0.75;  // 135°
-    final sweepAngle = pi * 1.5;   // 270°
+    final startAngle = pi * 0.75;
+    final sweepAngle = pi * 1.5;
 
     final bgPaint = Paint()
       ..color = Colors.black12
@@ -164,7 +164,7 @@ class _SpeedometerPainter extends CustomPainter {
       ..shader = shader
       ..strokeWidth = 18
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.butt; // 🔥 плоский кінець — без жопки
+      ..strokeCap = StrokeCap.butt;
 
     final progressAngle = sweepAngle * (percent / 100);
 
@@ -181,7 +181,7 @@ class _SpeedometerPainter extends CustomPainter {
       ..strokeWidth = 26
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22)
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.butt; // теж без округлення
+      ..strokeCap = StrokeCap.butt;
 
     canvas.drawArc(
       rect,

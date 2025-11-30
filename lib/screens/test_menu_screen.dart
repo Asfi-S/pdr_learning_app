@@ -31,7 +31,7 @@ class TestMenuScreen extends StatelessWidget {
     final all = await PdrTestsLoader.loadAll();
 
     final randomized = TestUtils.randomizeQuestions(all)
-        .take(20) // 20 випадкових
+        .take(20)
         .map(TestUtils.randomizeAnswers)
         .toList();
 
@@ -41,8 +41,8 @@ class TestMenuScreen extends StatelessWidget {
         builder: (_) => TestRunnerScreen(
           title: 'Екзаменаційний режим',
           questions: randomized,
-          withTimer: true,   // з таймером
-          timeLimitSeconds: 1200, // 20 хвилин
+          withTimer: true,
+          timeLimitSeconds: 1200,
         ),
       ),
     );

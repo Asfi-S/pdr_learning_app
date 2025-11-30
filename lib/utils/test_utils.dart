@@ -2,7 +2,6 @@ import 'dart:math';
 import '../models/test_question_model.dart';
 
 class TestUtils {
-  /// Перемішати список питань (нічого більше не робить)
   static List<TestQuestionModel> randomizeQuestions(
       List<TestQuestionModel> list,
       ) {
@@ -12,7 +11,6 @@ class TestUtils {
     return items;
   }
 
-  /// Перемішати відповіді в одному питанні
   static TestQuestionModel randomizeAnswers(TestQuestionModel q) {
     final rng = Random();
     final answers = List<String>.from(q.answers);

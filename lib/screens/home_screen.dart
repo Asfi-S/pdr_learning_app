@@ -74,7 +74,6 @@ class _HomeScreenState extends State<HomeScreen>
                     Image.asset("assets/images/pdr_logo.png", width: 200),
                     const SizedBox(height: 20),
 
-                    // Заголовок
                     Text(
                       "ПДР України 2025",
                       style: theme.textTheme.titleLarge?.copyWith(

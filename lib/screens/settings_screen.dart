@@ -23,9 +23,6 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
 
-          // ------------------------------
-          // 🔥 Перемикач теми
-          // ------------------------------
 
           Card(
             child: SwitchListTile(
@@ -42,9 +39,6 @@ class SettingsScreen extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // ------------------------------
-          // ℹ Інформація про програму
-          // ------------------------------
 
           Card(
             child: ListTile(
@@ -71,9 +65,6 @@ class SettingsScreen extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // ------------------------------
-          // 📊 ІСТОРІЯ ПРОХОДЖЕНЬ (ТЕПЕР РЕАЛЬНА)
-          // ------------------------------
 
           Card(
             child: ListTile(

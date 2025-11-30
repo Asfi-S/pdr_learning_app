@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class PdrTheme {
-  // 🌞 СВІТЛА ТЕМА
   static final ThemeData light = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
@@ -62,7 +61,6 @@ class PdrTheme {
     ),
   );
 
-  // 🌙 ТЕМНА ТЕМА
   static final ThemeData dark = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
