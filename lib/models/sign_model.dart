@@ -24,7 +24,6 @@ class RoadSign {
   final String id;
   final String title;
 
-  /// Тепер тут СПИСОК зображень
   final List<String> images;
 
   final String description;
