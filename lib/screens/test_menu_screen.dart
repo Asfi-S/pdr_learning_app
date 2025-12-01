@@ -20,7 +20,8 @@ class TestMenuScreen extends StatelessWidget {
         builder: (_) => TestRunnerScreen(
           title: 'Тренувальний режим',
           questions: randomized,
-          withTimer: false, // без таймера
+          withTimer: false,
+          trainingMode: true,
           timeLimitSeconds: null,
         ),
       ),
@@ -42,6 +43,7 @@ class TestMenuScreen extends StatelessWidget {
           title: 'Екзаменаційний режим',
           questions: randomized,
           withTimer: true,
+          trainingMode: false,
           timeLimitSeconds: 1200,
         ),
       ),
@@ -51,30 +53,23 @@ class TestMenuScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final onSurface = theme.colorScheme.onSurface.withOpacity(0.7);
+    final textDim = theme.colorScheme.onSurface.withOpacity(0.6);
 
-    Widget buildCard({
-      required String title,
-      required String subtitle,
-      required IconData icon,
-      required VoidCallback onTap,
-    }) {
+    Widget card(String title, String subtitle, IconData icon, VoidCallback tap) {
       return Card(
-        color: theme.cardColor,
         elevation: 3,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
+          onTap: tap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 CircleAvatar(
-                  radius: 20,
-                  backgroundColor: theme.colorScheme.primary.withOpacity(0.15),
+                  radius: 24,
+                  backgroundColor:
+                  theme.colorScheme.primary.withOpacity(0.2),
                   child: Icon(icon, color: theme.colorScheme.primary),
                 ),
                 const SizedBox(width: 16),
@@ -82,18 +77,15 @@ class TestMenuScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: theme.textTheme.titleLarge,
-                      ),
+                      Text(title, style: theme.textTheme.titleLarge),
                       const SizedBox(height: 4),
                       Text(subtitle,
-                          style: theme.textTheme.bodyMedium!
-                              .copyWith(color: onSurface)),
+                          style:
+                          theme.textTheme.bodyMedium!.copyWith(color: textDim)),
                     ],
                   ),
                 ),
-                const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+                const Icon(Icons.chevron_right_rounded)
               ],
             ),
           ),
@@ -107,19 +99,13 @@ class TestMenuScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            buildCard(
-              title: 'Тренувальний режим',
-              subtitle: 'Всі питання підряд, без таймера',
-              icon: Icons.school_rounded,
-              onTap: () => _startTraining(context),
-            ),
+            card('Тренувальний режим',
+                'Всі питання підряд, без таймера', Icons.school_rounded,
+                    () => _startTraining(context)),
             const SizedBox(height: 12),
-            buildCard(
-              title: 'Екзаменаційний режим',
-              subtitle: '20 випадкових питань, з таймером',
-              icon: Icons.timer_rounded,
-              onTap: () => _startExam(context),
-            ),
+            card('Екзаменаційний режим',
+                '20 випадкових питань, з таймером', Icons.timer_rounded,
+                    () => _startExam(context)),
           ],
         ),
       ),

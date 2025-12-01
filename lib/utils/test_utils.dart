@@ -13,6 +13,7 @@ class TestUtils {
 
   static TestQuestionModel randomizeAnswers(TestQuestionModel q) {
     final rng = Random();
+
     final answers = List<String>.from(q.answers);
     final correctIndex = q.correctIndex;
 
@@ -27,6 +28,7 @@ class TestUtils {
       answers: answers,
       correctIndex: newIndex,
       imagePath: q.imagePath,
+      explanation: q.explanation,
     );
   }
 }

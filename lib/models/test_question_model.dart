@@ -6,6 +6,8 @@ class TestQuestionModel {
   final int correctIndex;
   final String? imagePath;
 
+  final String? explanation;
+
   TestQuestionModel({
     required this.id,
     required this.sectionId,
@@ -13,6 +15,7 @@ class TestQuestionModel {
     required this.answers,
     required this.correctIndex,
     this.imagePath,
+    this.explanation,
   });
 
   factory TestQuestionModel.fromJson(Map<String, dynamic> json) {
@@ -23,6 +26,7 @@ class TestQuestionModel {
       answers: List<String>.from(json["answers"]),
       correctIndex: json["correctIndex"],
       imagePath: json["imagePath"],
+      explanation: json["explanation"],
     );
   }
 }
