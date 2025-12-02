@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
@@ -28,6 +29,7 @@ class TestRunnerScreen extends StatefulWidget {
 
 class _TestRunnerScreenState extends State<TestRunnerScreen>
     with SingleTickerProviderStateMixin {
+
   int index = 0;
   int? selected;
   int correct = 0;
@@ -35,12 +37,33 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
 
   bool showAira = false;
 
+  // Айра емоції
+  int _wrongStreak = 0;
+  String _airaImage = "";
+  String _airaText = "";
+
   Timer? _timer;
   late int timeLeft;
 
   late AnimationController _airaController;
   late Animation<double> _fade;
   late Animation<Offset> _slide;
+
+  final List<String> airaGoodPhrases = [
+    "Молодець! ❤️",
+    "Так тримати! ⭐",
+    "Я знала що ти зможеш! 😺",
+    "Супер! Дуже добре!",
+    "Гарно працюєш! 💪",
+  ];
+
+  final List<String> airaAngryPhrases = [
+    "Ти знущаєшся?! 😡",
+    "Я вже серйозно злюся! 😤",
+    "П'ять помилок! Ти хоч стараєшся?",
+    "Нє… так справа не піде.",
+    "Йой… ну як так… 😠",
+  ];
 
   @override
   void initState() {
@@ -54,12 +77,11 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
 
     _airaController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 450),
     );
 
     _fade = CurvedAnimation(parent: _airaController, curve: Curves.easeOut);
-    _slide =
-        Tween(begin: const Offset(0, 0.25), end: Offset.zero).animate(_fade);
+    _slide = Tween(begin: const Offset(0, 0.25), end: Offset.zero).animate(_fade);
   }
 
   void _startTimer() {
@@ -80,14 +102,36 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     super.dispose();
   }
 
-  void _showAiraExplanation() {
+  void _showAiraForAnswer(bool isCorrect) {
     if (!widget.trainingMode) return;
-    if (widget.questions[index].explanation == null) return;
+
+    final q = widget.questions[index];
+    final rnd = Random();
 
     setState(() {
       showAira = true;
+
+      if (isCorrect) {
+        _wrongStreak = 0;
+        _airaImage = "assets/images/aira_happy.gif";
+        _airaText = airaGoodPhrases[rnd.nextInt(airaGoodPhrases.length)];
+      } else {
+        _wrongStreak++;
+
+        if (_wrongStreak >= 5) {
+          _airaImage = "assets/images/aira_angry.gif";
+          _airaText =
+          "${q.explanation}\n\n${airaAngryPhrases[rnd.nextInt(airaAngryPhrases.length)]}";
+        } else {
+          _airaImage = "assets/images/aira_sad.gif";
+          _airaText = q.explanation ?? "Помилка";
+        }
+      }
     });
-    _airaController.forward();
+
+    _airaController
+      ..reset()
+      ..forward();
   }
 
   Future<void> _finishTest() async {
@@ -147,8 +191,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
                 LinearProgressIndicator(
                   value: (index + 1) / widget.questions.length,
                   minHeight: 6,
-                  backgroundColor:
-                  theme.colorScheme.primary.withOpacity(0.15),
+                  backgroundColor: theme.colorScheme.primary.withOpacity(0.15),
                 ),
 
                 const SizedBox(height: 16),
@@ -176,8 +219,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
                       Color borderColor = Colors.transparent;
 
                       if (!answered && selected == i) {
-                        tileColor =
-                            theme.colorScheme.primary.withOpacity(0.20);
+                        tileColor = theme.colorScheme.primary.withOpacity(0.20);
                         borderColor = theme.colorScheme.primary;
                       }
 
@@ -199,8 +241,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
                             borderRadius: BorderRadius.circular(14),
                             side: BorderSide(color: borderColor, width: 2),
                           ),
-                          title: Text(q.answers[i],
-                              style: theme.textTheme.bodyLarge),
+                          title: Text(q.answers[i], style: theme.textTheme.bodyLarge),
                           onTap: answered
                               ? null
                               : () => setState(() => selected = i),
@@ -217,13 +258,12 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
                         ? null
                         : () {
                       if (!answered) {
-                        setState(() {
-                          answered = true;
-                          if (selected == q.correctIndex)
-                            correct++;
-                          else
-                            _showAiraExplanation();
-                        });
+                        setState(() => answered = true);
+
+                        final isCorrect = selected == q.correctIndex;
+                        if (isCorrect) correct++;
+
+                        _showAiraForAnswer(isCorrect);
                         return;
                       }
 
@@ -254,48 +294,63 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
             ),
           ),
 
-          /// 🔥 AIRA ASSISTANT POPUP (only training mode)
+          // -----------------------
+          // AIRA POPUP (GIF)
+          // -----------------------
           if (showAira && widget.trainingMode)
-            Align(
-              alignment: Alignment.bottomCenter,
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
               child: SlideTransition(
                 position: _slide,
                 child: FadeTransition(
                   opacity: _fade,
-                  child: Container(
-                    margin: const EdgeInsets.all(16),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 10,
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Image.asset(
-                          "assets/images/aira_assistant.png",
-                          width: 70,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            q.explanation ?? "Помилка",
-                            style: theme.textTheme.bodyLarge,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      margin: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.35),
+                            blurRadius: 12,
+                            offset: const Offset(0, -3),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () {
-                            _airaController.reverse();
-                            setState(() => showAira = false);
-                          },
-                        )
-                      ],
+                        ],
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Image.asset(
+                            _airaImage,
+                            width: 72,
+                          ),
+
+                          const SizedBox(width: 12),
+
+                          Expanded(
+                            child: Text(
+                              _airaText,
+                              style: theme.textTheme.bodyLarge,
+                            ),
+                          ),
+
+                          GestureDetector(
+                            onTap: () {
+                              _airaController.reverse();
+                              setState(() => showAira = false);
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.all(6),
+                              child: Icon(Icons.close_rounded, size: 26),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
