@@ -11,16 +11,22 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Бази даних
+  # ----------------------------
+  # 🔥 ЛОКАЛЬНІ ДАНІ
+  # ----------------------------
   sqflite: ^2.3.2
   sqflite_common_ffi: ^2.3.0+4
   path_provider: ^2.1.2
 
-  # Історія тестів (SharedPrefs)
+  # Історія тестів
   shared_preferences: ^2.2.2
 
-  # 🔥 Форматування дат (для HistoryScreen)
+  # Форматування дат
   intl: ^0.19.0
+
+  # Профіль користувача (Hive)
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -28,13 +34,17 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.13.1
 
+  # Генерація моделей Hive
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.6
+
 flutter:
   uses-material-design: true
 
   assets:
-    - assets/pdr/signs/
-    - assets/images/
+    - assets/images/        # GIF, PNG для Айри
     - assets/pdr/
+    - assets/pdr/signs/
 
 flutter_launcher_icons:
   android: true

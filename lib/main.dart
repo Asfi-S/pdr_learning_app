@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
 import 'theme/pdr_theme.dart';
 
+// Screens
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/history_screen.dart';
@@ -9,11 +12,22 @@ import 'screens/theory_screen.dart';
 import 'screens/test_menu_screen.dart';
 import 'screens/traffic_signs_screen.dart';
 import 'screens/sections_details_screen.dart';
+import 'screens/profile_screen.dart';
 
+// Models
 import 'models/section_model.dart';
+import 'models/user_profile.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔥 Ініціалізація Hive
+  await Hive.initFlutter();
+  Hive.registerAdapter(UserProfileAdapter());
+
+  // 🔥 Відкриваємо box профілю
+  await Hive.openBox<UserProfile>("user_profile");
+
   runApp(const PDRApp());
 }
 
@@ -37,6 +51,7 @@ class _PDRAppState extends State<PDRApp> {
   Future<void> _loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getBool("isDark") ?? false;
+
     setState(() {
       _isDark = saved;
       _loaded = true;
@@ -44,17 +59,17 @@ class _PDRAppState extends State<PDRApp> {
   }
 
   void toggleTheme() async {
-    final newValue = !_isDark;
-    setState(() => _isDark = newValue);
-
     final prefs = await SharedPreferences.getInstance();
+    final newValue = !_isDark;
+
     await prefs.setBool("isDark", newValue);
+    setState(() => _isDark = newValue);
   }
 
   @override
   Widget build(BuildContext context) {
     if (!_loaded) {
-      return MaterialApp(
+      return const MaterialApp(
         home: Scaffold(
           body: Center(child: CircularProgressIndicator()),
         ),
@@ -80,6 +95,7 @@ class _PDRAppState extends State<PDRApp> {
         "/theory": (_) => const TheoryScreen(),
         "/test": (_) => const TestMenuScreen(),
         "/signs": (_) => const TrafficSignsScreen(),
+        "/profile": (_) => const ProfileScreen(),
       },
 
       onGenerateRoute: (settings) {

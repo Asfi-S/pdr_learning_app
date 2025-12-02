@@ -42,9 +42,16 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text("ПДР України 2025"),
+
+        // 🔥 Дві іконки: зліва профіль, справа налаштування
+        leading: IconButton(
+          icon: const Icon(Icons.account_circle_rounded, size: 30),
+          onPressed: () => Navigator.pushNamed(context, "/profile"),
+        ),
+
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.settings, size: 26),
             onPressed: () => Navigator.pushNamed(context, "/settings"),
           )
         ],

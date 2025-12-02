@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../models/test_question_model.dart';
 import '../widgets/speedometer_result.dart';
 import '../data/history_manager.dart';
+import '../data/user_profile_manager.dart';
 
 class TestRunnerScreen extends StatefulWidget {
   final String title;
@@ -37,8 +38,9 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
 
   bool showAira = false;
 
-  // Айра емоції
+  // Айра
   int _wrongStreak = 0;
+
   String _airaImage = "";
   String _airaText = "";
 
@@ -81,7 +83,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     );
 
     _fade = CurvedAnimation(parent: _airaController, curve: Curves.easeOut);
-    _slide = Tween(begin: const Offset(0, 0.25), end: Offset.zero).animate(_fade);
+    _slide =
+        Tween(begin: const Offset(0, 0.25), end: Offset.zero).animate(_fade);
   }
 
   void _startTimer() {
@@ -100,6 +103,20 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     _timer?.cancel();
     _airaController.dispose();
     super.dispose();
+  }
+
+  // 🔥 ОНОВЛЕННЯ СТАТИСТИКИ (сумісне з твоїм UserProfile)
+  Future<void> _updateProfileStats(bool isCorrect) async {
+    final profile = await UserProfileManager.loadProfile();
+
+    if (isCorrect) {
+      profile.correctAnswers++;
+      profile.addXP(5);     // Нараховує XP + обновляє level
+    } else {
+      profile.wrongAnswers++;
+    }
+
+    await UserProfileManager.saveProfile(profile);
   }
 
   void _showAiraForAnswer(bool isCorrect) {
@@ -144,6 +161,9 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
         date: DateTime.now(),
       ),
     );
+
+    // 🔥 Додаємо "пройдено тест"
+    await UserProfileManager.addTestPassed();
 
     Navigator.pushReplacement(
       context,
@@ -191,7 +211,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
                 LinearProgressIndicator(
                   value: (index + 1) / widget.questions.length,
                   minHeight: 6,
-                  backgroundColor: theme.colorScheme.primary.withOpacity(0.15),
+                  backgroundColor:
+                  theme.colorScheme.primary.withOpacity(0.15),
                 ),
 
                 const SizedBox(height: 16),
@@ -219,7 +240,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
                       Color borderColor = Colors.transparent;
 
                       if (!answered && selected == i) {
-                        tileColor = theme.colorScheme.primary.withOpacity(0.20);
+                        tileColor =
+                            theme.colorScheme.primary.withOpacity(0.20);
                         borderColor = theme.colorScheme.primary;
                       }
 
@@ -241,10 +263,10 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
                             borderRadius: BorderRadius.circular(14),
                             side: BorderSide(color: borderColor, width: 2),
                           ),
-                          title: Text(q.answers[i], style: theme.textTheme.bodyLarge),
-                          onTap: answered
-                              ? null
-                              : () => setState(() => selected = i),
+                          title: Text(q.answers[i],
+                              style: theme.textTheme.bodyLarge),
+                          onTap:
+                          answered ? null : () => setState(() => selected = i),
                         ),
                       );
                     },
@@ -256,13 +278,14 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
                   child: ElevatedButton(
                     onPressed: selected == null
                         ? null
-                        : () {
+                        : () async {
                       if (!answered) {
                         setState(() => answered = true);
 
                         final isCorrect = selected == q.correctIndex;
                         if (isCorrect) correct++;
 
+                        await _updateProfileStats(isCorrect);
                         _showAiraForAnswer(isCorrect);
                         return;
                       }
@@ -294,9 +317,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
             ),
           ),
 
-          // -----------------------
-          // AIRA POPUP (GIF)
-          // -----------------------
           if (showAira && widget.trainingMode)
             Positioned(
               left: 0,
@@ -306,51 +326,44 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
                 position: _slide,
                 child: FadeTransition(
                   opacity: _fade,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Container(
-                      margin: const EdgeInsets.all(12),
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: theme.cardColor,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.35),
-                            blurRadius: 12,
-                            offset: const Offset(0, -3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Image.asset(
-                            _airaImage,
-                            width: 72,
-                          ),
+                  child: Container(
+                    margin: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.35),
+                          blurRadius: 12,
+                          offset: const Offset(0, -3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Image.asset(_airaImage, width: 72),
+                        const SizedBox(width: 12),
 
-                          const SizedBox(width: 12),
-
-                          Expanded(
-                            child: Text(
-                              _airaText,
-                              style: theme.textTheme.bodyLarge,
-                            ),
+                        Expanded(
+                          child: Text(
+                            _airaText,
+                            style: theme.textTheme.bodyLarge,
                           ),
+                        ),
 
-                          GestureDetector(
-                            onTap: () {
-                              _airaController.reverse();
-                              setState(() => showAira = false);
-                            },
-                            child: const Padding(
-                              padding: EdgeInsets.all(6),
-                              child: Icon(Icons.close_rounded, size: 26),
-                            ),
+                        GestureDetector(
+                          onTap: () {
+                            _airaController.reverse();
+                            setState(() => showAira = false);
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.all(6),
+                            child: Icon(Icons.close_rounded, size: 26),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -395,7 +408,6 @@ class _ResultScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               SpeedometerResult(percent: percent),
-
               const SizedBox(height: 40),
 
               ElevatedButton(
