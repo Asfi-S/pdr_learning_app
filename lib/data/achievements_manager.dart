@@ -63,7 +63,6 @@ class AchievementsManager {
       if (shouldUnlock) {
         profile.unlockedAchievements.add(achievement.id);
 
-        // ❗ POPUP — НЕ ПОВЕРТАЄ НІЧОГО, просто чекаємо завершення
         await showAchievementPopup(
           context,
           title: achievement.title,
@@ -71,7 +70,6 @@ class AchievementsManager {
           icon: achievement.icon,
         );
 
-        // пауза між popup
         await Future.delayed(const Duration(milliseconds: 150));
       }
     }

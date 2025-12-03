@@ -90,9 +90,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     super.dispose();
   }
 
-  // --------------------------
-  //  UPDATE STAT + AIRA LOGIC
-  // --------------------------
 
   Future<void> _registerAnswer(bool isCorrect, TestQuestionModel q) async {
     final profile = await UserProfileManager.loadProfile();
@@ -133,9 +130,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
   String _random(List<String> list) =>
       list[Random().nextInt(list.length)];
 
-  // --------------------------
-  // NEXT BUTTON HANDLING
-  // --------------------------
 
   Future<void> _onPressNext() async {
     final q = widget.questions[index];
@@ -166,9 +160,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     }
   }
 
-  // --------------------------
-  // FINISH TEST + ACHIEVEMENTS
-  // --------------------------
 
   Future<void> _finishTest() async {
     timer?.cancel();
@@ -202,9 +193,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     );
   }
 
-  // --------------------------
-  // UI
-  // --------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -317,9 +305,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     );
   }
 
-  // --------------------------
-  //  FIXED PERFECT AIRA BOX
-  // --------------------------
 
   Widget _buildAira() {
     return Positioned(
