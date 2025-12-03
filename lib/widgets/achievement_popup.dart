@@ -69,17 +69,19 @@ class _AchievementPopupState extends State<AchievementPopup>
           opacity: _fade,
           child: Container(
             padding: const EdgeInsets.all(14),
+
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.15),
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 3),
+                  color: Colors.black.withOpacity(0.35),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
                 )
               ],
             ),
+
             child: Row(
               children: [
                 Image.asset(widget.iconPath, width: 48),

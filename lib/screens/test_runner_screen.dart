@@ -310,7 +310,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     return Positioned(
       left: 0,
       right: 0,
-      bottom: 0,
+      bottom: 80,
       child: IgnorePointer(
         ignoring: true,
         child: SlideTransition(
@@ -318,7 +318,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
           child: FadeTransition(
             opacity: fadeAnimation,
             child: Container(
-              margin: const EdgeInsets.all(12),
+              margin: const EdgeInsets.symmetric(horizontal: 12),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(0.28),
@@ -338,7 +338,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
                       airaText,
                       style: const TextStyle(fontSize: 16),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -347,6 +347,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
       ),
     );
   }
+
 
   String _formatTime(int sec) {
     final m = (sec ~/ 60).toString().padLeft(2, "0");
