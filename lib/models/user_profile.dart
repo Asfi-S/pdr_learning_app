@@ -22,6 +22,9 @@ class UserProfile extends HiveObject {
   @HiveField(5)
   int wrongAnswers;
 
+  @HiveField(6)
+  List<String> unlockedAchievements;
+
   UserProfile({
     required this.username,
     this.xp = 0,
@@ -29,14 +32,13 @@ class UserProfile extends HiveObject {
     this.testsPassed = 0,
     this.correctAnswers = 0,
     this.wrongAnswers = 0,
-  });
+    List<String>? unlockedAchievements,
+  }) : unlockedAchievements = unlockedAchievements ?? [];
 
-  /// Автоматичний підрахунок рівня
   void recalcLevel() {
     level = (xp ~/ 100) + 1;
   }
 
-  /// Додавання досвіду
   void addXP(int amount) {
     xp += amount;
     recalcLevel();

@@ -23,13 +23,14 @@ class UserProfileAdapter extends TypeAdapter<UserProfile> {
       testsPassed: fields[3] as int,
       correctAnswers: fields[4] as int,
       wrongAnswers: fields[5] as int,
+      unlockedAchievements: (fields[6] as List?)?.cast<String>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, UserProfile obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.username)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class UserProfileAdapter extends TypeAdapter<UserProfile> {
       ..writeByte(4)
       ..write(obj.correctAnswers)
       ..writeByte(5)
-      ..write(obj.wrongAnswers);
+      ..write(obj.wrongAnswers)
+      ..writeByte(6)
+      ..write(obj.unlockedAchievements);
   }
 
   @override

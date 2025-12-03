@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../models/test_question_model.dart';
 import '../widgets/speedometer_result.dart';
 import '../data/history_manager.dart';
 import '../data/user_profile_manager.dart';
+import '../data/achievements_manager.dart';
 
 class TestRunnerScreen extends StatefulWidget {
   final String title;
@@ -32,40 +32,24 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     with SingleTickerProviderStateMixin {
 
   int index = 0;
-  int? selected;
-  int correct = 0;
-  bool answered = false;
+  int? selectedAnswer;
+  int correctAnswers = 0;
 
+  bool answered = false;
   bool showAira = false;
 
-  // Айра
-  int _wrongStreak = 0;
+  // AIRA state
+  String airaImage = "";
+  String airaText = "";
+  int wrongStreak = 0;
 
-  String _airaImage = "";
-  String _airaText = "";
+  // AIRA animations
+  late AnimationController airaController;
+  late Animation<Offset> slideAnimation;
+  late Animation<double> fadeAnimation;
 
-  Timer? _timer;
+  Timer? timer;
   late int timeLeft;
-
-  late AnimationController _airaController;
-  late Animation<double> _fade;
-  late Animation<Offset> _slide;
-
-  final List<String> airaGoodPhrases = [
-    "Молодець! ❤️",
-    "Так тримати! ⭐",
-    "Я знала що ти зможеш! 😺",
-    "Супер! Дуже добре!",
-    "Гарно працюєш! 💪",
-  ];
-
-  final List<String> airaAngryPhrases = [
-    "Ти знущаєшся?! 😡",
-    "Я вже серйозно злюся! 😤",
-    "П'ять помилок! Ти хоч стараєшся?",
-    "Нє… так справа не піде.",
-    "Йой… ну як так… 😠",
-  ];
 
   @override
   void initState() {
@@ -74,96 +58,137 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     timeLeft = widget.timeLimitSeconds ?? 0;
 
     if (widget.withTimer && widget.timeLimitSeconds != null) {
-      _startTimer();
+      timer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (timeLeft <= 0) {
+          _finishTest();
+        } else {
+          setState(() => timeLeft--);
+        }
+      });
     }
 
-    _airaController = AnimationController(
+    airaController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 450),
+      duration: const Duration(milliseconds: 350),
     );
 
-    _fade = CurvedAnimation(parent: _airaController, curve: Curves.easeOut);
-    _slide =
-        Tween(begin: const Offset(0, 0.25), end: Offset.zero).animate(_fade);
-  }
+    fadeAnimation = CurvedAnimation(
+      parent: airaController,
+      curve: Curves.easeOut,
+    );
 
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (timeLeft <= 0) {
-        t.cancel();
-        _finishTest();
-      } else {
-        setState(() => timeLeft--);
-      }
-    });
+    slideAnimation = Tween(
+      begin: const Offset(0, 0.25),
+      end: Offset.zero,
+    ).animate(fadeAnimation);
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
-    _airaController.dispose();
+    timer?.cancel();
+    airaController.dispose();
     super.dispose();
   }
 
-  // 🔥 ОНОВЛЕННЯ СТАТИСТИКИ (сумісне з твоїм UserProfile)
-  Future<void> _updateProfileStats(bool isCorrect) async {
+  // --------------------------
+  //  UPDATE STAT + AIRA LOGIC
+  // --------------------------
+
+  Future<void> _registerAnswer(bool isCorrect, TestQuestionModel q) async {
     final profile = await UserProfileManager.loadProfile();
 
     if (isCorrect) {
+      correctAnswers++;
       profile.correctAnswers++;
-      profile.addXP(5);     // Нараховує XP + обновляє level
+      profile.addXP(5);
+      wrongStreak = 0;
+
+      airaImage = "assets/images/aira_happy.gif";
+      airaText = _random([
+        "Молодець ❤️",
+        "Так тримати ⭐",
+        "Я знала, що ти зможеш 😺"
+      ]);
     } else {
+      wrongStreak++;
       profile.wrongAnswers++;
+
+      if (wrongStreak >= 5) {
+        airaImage = "assets/images/aira_angry.gif";
+        airaText = "${q.explanation}\n\nТи хоч стараєшся?";
+      } else {
+        airaImage = "assets/images/aira_sad.gif";
+        airaText = q.explanation ?? "Помилка.";
+      }
     }
 
     await UserProfileManager.saveProfile(profile);
+
+    if (widget.trainingMode) {
+      setState(() => showAira = true);
+      airaController.forward(from: 0);
+    }
   }
 
-  void _showAiraForAnswer(bool isCorrect) {
-    if (!widget.trainingMode) return;
+  String _random(List<String> list) =>
+      list[Random().nextInt(list.length)];
 
+  // --------------------------
+  // NEXT BUTTON HANDLING
+  // --------------------------
+
+  Future<void> _onPressNext() async {
     final q = widget.questions[index];
-    final rnd = Random();
 
-    setState(() {
-      showAira = true;
+    // Перше натискання — перевірка
+    if (!answered) {
+      if (selectedAnswer == null) return;
 
-      if (isCorrect) {
-        _wrongStreak = 0;
-        _airaImage = "assets/images/aira_happy.gif";
-        _airaText = airaGoodPhrases[rnd.nextInt(airaGoodPhrases.length)];
-      } else {
-        _wrongStreak++;
+      setState(() => answered = true);
 
-        if (_wrongStreak >= 5) {
-          _airaImage = "assets/images/aira_angry.gif";
-          _airaText =
-          "${q.explanation}\n\n${airaAngryPhrases[rnd.nextInt(airaAngryPhrases.length)]}";
-        } else {
-          _airaImage = "assets/images/aira_sad.gif";
-          _airaText = q.explanation ?? "Помилка";
-        }
-      }
-    });
+      final isCorrect = selectedAnswer == q.correctIndex;
+      await _registerAnswer(isCorrect, q);
 
-    _airaController
-      ..reset()
-      ..forward();
+      return;
+    }
+
+    // Друге натискання — наступне питання
+    if (index < widget.questions.length - 1) {
+      setState(() {
+        index++;
+        selectedAnswer = null;
+        answered = false;
+        showAira = false;
+        airaController.reset();
+      });
+    } else {
+      _finishTest();
+    }
   }
+
+  // --------------------------
+  // FINISH TEST + ACHIEVEMENTS
+  // --------------------------
 
   Future<void> _finishTest() async {
+    timer?.cancel();
+
     await HistoryManager.add(
       HistoryItem(
         title: widget.title,
         total: widget.questions.length,
-        right: correct,
-        percent: ((correct / widget.questions.length) * 100).round(),
+        right: correctAnswers,
+        percent: ((correctAnswers / widget.questions.length) * 100).round(),
         date: DateTime.now(),
       ),
     );
 
-    // 🔥 Додаємо "пройдено тест"
     await UserProfileManager.addTestPassed();
+
+    final profile = await UserProfileManager.loadProfile();
+    await AchievementsManager.check(profile, context);
+
+    if (!mounted) return;
 
     Navigator.pushReplacement(
       context,
@@ -171,16 +196,20 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
         builder: (_) => _ResultScreen(
           title: widget.title,
           total: widget.questions.length,
-          right: correct,
+          right: correctAnswers,
         ),
       ),
     );
   }
 
+  // --------------------------
+  // UI
+  // --------------------------
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final q = widget.questions[index];
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -189,194 +218,154 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
           if (widget.withTimer)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Center(
-                child: Text(
-                  _formatTime(timeLeft),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontFeatures: [FontFeature.tabularFigures()],
-                  ),
-                ),
-              ),
+              child: Center(child: Text(_formatTime(timeLeft))),
             ),
         ],
       ),
-
       body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                LinearProgressIndicator(
-                  value: (index + 1) / widget.questions.length,
-                  minHeight: 6,
-                  backgroundColor:
-                  theme.colorScheme.primary.withOpacity(0.15),
-                ),
-
-                const SizedBox(height: 16),
-
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(q.question, style: theme.textTheme.titleLarge),
-                ),
-
-                const SizedBox(height: 12),
-
-                if (q.imagePath != null) ...[
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(q.imagePath!),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: q.answers.length,
-                    itemBuilder: (_, i) {
-                      Color tileColor = theme.cardColor;
-                      Color borderColor = Colors.transparent;
-
-                      if (!answered && selected == i) {
-                        tileColor =
-                            theme.colorScheme.primary.withOpacity(0.20);
-                        borderColor = theme.colorScheme.primary;
-                      }
-
-                      if (answered) {
-                        if (i == q.correctIndex) {
-                          tileColor = Colors.green.shade400;
-                          borderColor = Colors.green.shade700;
-                        } else if (selected == i) {
-                          tileColor = Colors.red.shade400;
-                          borderColor = Colors.red.shade700;
-                        }
-                      }
-
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        child: ListTile(
-                          tileColor: tileColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            side: BorderSide(color: borderColor, width: 2),
-                          ),
-                          title: Text(q.answers[i],
-                              style: theme.textTheme.bodyLarge),
-                          onTap:
-                          answered ? null : () => setState(() => selected = i),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: selected == null
-                        ? null
-                        : () async {
-                      if (!answered) {
-                        setState(() => answered = true);
-
-                        final isCorrect = selected == q.correctIndex;
-                        if (isCorrect) correct++;
-
-                        await _updateProfileStats(isCorrect);
-                        _showAiraForAnswer(isCorrect);
-                        return;
-                      }
-
-                      if (index < widget.questions.length - 1) {
-                        setState(() {
-                          index++;
-                          selected = null;
-                          answered = false;
-                          showAira = false;
-                          _airaController.reset();
-                        });
-                      } else {
-                        _timer?.cancel();
-                        _finishTest();
-                      }
-                    },
-                    child: Text(
-                      !answered
-                          ? "Вибрати"
-                          : (index == widget.questions.length - 1
-                          ? "Завершити"
-                          : "Далі"),
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          if (showAira && widget.trainingMode)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: SlideTransition(
-                position: _slide,
-                child: FadeTransition(
-                  opacity: _fade,
-                  child: Container(
-                    margin: const EdgeInsets.all(12),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.35),
-                          blurRadius: 12,
-                          offset: const Offset(0, -3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Image.asset(_airaImage, width: 72),
-                        const SizedBox(width: 12),
-
-                        Expanded(
-                          child: Text(
-                            _airaText,
-                            style: theme.textTheme.bodyLarge,
-                          ),
-                        ),
-
-                        GestureDetector(
-                          onTap: () {
-                            _airaController.reverse();
-                            setState(() => showAira = false);
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.all(6),
-                            child: Icon(Icons.close_rounded, size: 26),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          _buildTestUI(q, theme),
+          if (showAira && widget.trainingMode) _buildAira(),
         ],
       ),
     );
   }
 
+  Widget _buildTestUI(TestQuestionModel q, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          LinearProgressIndicator(
+            value: (index + 1) / widget.questions.length,
+          ),
+
+          const SizedBox(height: 16),
+
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(q.question, style: theme.textTheme.titleLarge),
+          ),
+
+          if (q.imagePath != null) ...[
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(q.imagePath!),
+            ),
+          ],
+
+          const SizedBox(height: 16),
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: q.answers.length,
+              itemBuilder: (_, i) => _buildAnswerTile(q, i, theme),
+            ),
+          ),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed:
+              (!answered && selectedAnswer == null) ? null : _onPressNext,
+              child: Text(
+                !answered
+                    ? "Вибрати"
+                    : (index == widget.questions.length - 1 ? "Завершити" : "Далі"),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnswerTile(TestQuestionModel q, int i, ThemeData theme) {
+    final bool isCorrect = answered && i == q.correctIndex;
+    final bool isWrong = answered && selectedAnswer == i && i != q.correctIndex;
+
+    Color tileColor = theme.cardColor;
+    Color borderColor = Colors.transparent;
+
+    if (!answered && selectedAnswer == i) {
+      tileColor = theme.colorScheme.primary.withOpacity(0.25);
+      borderColor = theme.colorScheme.primary;
+    }
+
+    if (isCorrect) {
+      tileColor = Colors.green.shade400;
+      borderColor = Colors.green.shade700;
+    }
+
+    if (isWrong) {
+      tileColor = Colors.red.shade400;
+      borderColor = Colors.red.shade700;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        tileColor: tileColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: borderColor, width: 2),
+        ),
+        title: Text(q.answers[i]),
+        onTap: answered ? null : () => setState(() => selectedAnswer = i),
+      ),
+    );
+  }
+
+  // --------------------------
+  //  FIXED PERFECT AIRA BOX
+  // --------------------------
+
+  Widget _buildAira() {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: IgnorePointer(
+        ignoring: true,
+        child: SlideTransition(
+          position: slideAnimation,
+          child: FadeTransition(
+            opacity: fadeAnimation,
+            child: Container(
+              margin: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.28),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Image.asset(
+                    airaImage,
+                    width: 70,
+                    height: 70,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      airaText,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   String _formatTime(int sec) {
-    final m = (sec ~/ 60).toString().padLeft(2, '0');
-    final s = (sec % 60).toString().padLeft(2, '0');
+    final m = (sec ~/ 60).toString().padLeft(2, "0");
+    final s = (sec % 60).toString().padLeft(2, "0");
     return "$m:$s";
   }
 }
@@ -397,19 +386,16 @@ class _ResultScreen extends StatelessWidget {
     final percent = (right / total * 100).round();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Результат тесту")),
+      appBar: AppBar(title: const Text("Результат")),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
+              Text(title, style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 20),
-
               SpeedometerResult(percent: percent),
               const SizedBox(height: 40),
-
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text("Повернутися"),
