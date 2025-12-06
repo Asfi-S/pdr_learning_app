@@ -1,4 +1,4 @@
-package com.example.pdr_learning_app
+package ua.asfinia.pdrlearning
 
 import io.flutter.embedding.android.FlutterActivity
 

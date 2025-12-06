@@ -4,7 +4,6 @@ import '../models/user_profile.dart';
 class UserProfileManager {
   static const String boxName = "user_profile_box";
 
-  /// Завантаження профілю
   static Future<UserProfile> loadProfile() async {
     final box = await Hive.openBox<UserProfile>(boxName);
 
@@ -17,20 +16,17 @@ class UserProfileManager {
     return box.get(0)!;
   }
 
-  /// Збереження профілю
   static Future<void> saveProfile(UserProfile profile) async {
     final box = await Hive.openBox<UserProfile>(boxName);
     await box.put(0, profile);
   }
 
-  /// Додавання досвіду
   static Future<void> addXP(int amount) async {
     final p = await loadProfile();
     p.addXP(amount);
     await saveProfile(p);
   }
 
-  /// Оновлення статистики відповідей
   static Future<void> updateStats({required bool correct}) async {
     final profile = await loadProfile();
 

@@ -12,9 +12,13 @@ import 'screens/test_menu_screen.dart';
 import 'screens/traffic_signs_screen.dart';
 import 'screens/sections_details_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/set_name_screen.dart';
 
 import 'models/section_model.dart';
 import 'models/user_profile.dart';
+
+import 'data/user_name_manager.dart';
+import 'data/user_profile_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,11 +27,14 @@ Future<void> main() async {
   Hive.registerAdapter(UserProfileAdapter());
   await Hive.openBox<UserProfile>("user_profile");
 
-  runApp(const PDRApp());
+  final hasName = await UserNameManager.hasName();
+
+  runApp(PDRApp(firstStart: !hasName));
 }
 
 class PDRApp extends StatefulWidget {
-  const PDRApp({super.key});
+  final bool firstStart;
+  const PDRApp({super.key, required this.firstStart});
 
   @override
   State<PDRApp> createState() => _PDRAppState();
@@ -73,13 +80,10 @@ class _PDRAppState extends State<PDRApp> {
       darkTheme: PdrTheme.dark,
       themeMode: _isDark ? ThemeMode.dark : ThemeMode.light,
 
-      home: const HomeScreen(),
+      home: widget.firstStart ? const SetNameScreen() : const HomeScreen(),
 
       routes: {
-        "/settings": (_) => SettingsScreen(
-          toggleTheme: toggleTheme,
-          isDark: _isDark,
-        ),
+        "/settings": (_) => SettingsScreen(toggleTheme: toggleTheme, isDark: _isDark),
         "/history": (_) => const HistoryScreen(),
         "/theory": (_) => const TheoryScreen(),
         "/test": (_) => const TestMenuScreen(),
