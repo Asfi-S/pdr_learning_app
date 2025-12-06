@@ -4,7 +4,8 @@ import '../data/user_profile_manager.dart';
 import 'home_screen.dart';
 
 class SetNameScreen extends StatefulWidget {
-  const SetNameScreen({super.key});
+  final bool firstSetup;
+  const SetNameScreen({super.key, this.firstSetup = false});
 
   @override
   State<SetNameScreen> createState() => _SetNameScreenState();
@@ -13,6 +14,18 @@ class SetNameScreen extends StatefulWidget {
 class _SetNameScreenState extends State<SetNameScreen> {
   final TextEditingController _controller = TextEditingController();
   bool loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadName();
+  }
+
+  Future<void> _loadName() async {
+    final profile = await UserProfileManager.loadProfile();
+    _controller.text = profile.username;
+    setState(() {});
+  }
 
   Future<void> _save() async {
     final name = _controller.text.trim();
@@ -27,10 +40,15 @@ class _SetNameScreenState extends State<SetNameScreen> {
     await UserProfileManager.saveProfile(profile);
 
     if (!mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-          (route) => false,
-    );
+
+    if (widget.firstSetup) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+            (route) => false,
+      );
+    } else {
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -39,7 +57,7 @@ class _SetNameScreenState extends State<SetNameScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Вкажи ім'я"),
+        title: const Text("Вкажи імʼя"),
         centerTitle: true,
       ),
       body: Center(
@@ -81,7 +99,7 @@ class _SetNameScreenState extends State<SetNameScreen> {
                       color: Colors.white,
                     ),
                   )
-                      : const Text("Продовжити"),
+                      : const Text("Зберегти"),
                 ),
               ),
             ],

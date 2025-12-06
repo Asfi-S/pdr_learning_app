@@ -20,7 +20,6 @@ class ProfileScreen extends StatelessWidget {
 
         final p = snapshot.data!;
 
-        // Аватар за рівнем
         String avatar = "assets/images/aira_happy.png";
         if (p.level >= 5) avatar = "assets/images/aira_sad.png";
         if (p.level >= 10) avatar = "assets/images/aira_angry.png";
@@ -34,13 +33,31 @@ class ProfileScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  // Аватар і рівень
                   Center(
                     child: Column(
                       children: [
                         Image.asset(avatar, width: 120),
                         const SizedBox(height: 10),
-                        Text(p.username, style: theme.textTheme.titleLarge),
+
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              p.username,
+                              style: theme.textTheme.titleLarge,
+                            ),
+                            const SizedBox(width: 6),
+
+                            GestureDetector(
+                              onTap: () async {
+                                await Navigator.pushNamed(context, "/set_name");
+                                (context as Element).reassemble(); // оновлення
+                              },
+                              child: const Icon(Icons.edit, size: 22),
+                            ),
+                          ],
+                        ),
+
                         Text("Рівень ${p.level}", style: theme.textTheme.bodyLarge),
                       ],
                     ),
@@ -49,7 +66,6 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   const Divider(),
 
-                  // Статистика
                   ListTile(
                     leading: Icon(Icons.emoji_events, color: theme.colorScheme.primary),
                     title: const Text("XP"),
@@ -80,7 +96,9 @@ class ProfileScreen extends StatelessWidget {
 
                   Text(
                     "Досягнення",
-                    style: theme.textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 12),
 

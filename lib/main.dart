@@ -12,7 +12,7 @@ import 'screens/test_menu_screen.dart';
 import 'screens/traffic_signs_screen.dart';
 import 'screens/sections_details_screen.dart';
 import 'screens/profile_screen.dart';
-import 'screens/set_name_screen.dart';
+import 'screens/set_name_screen.dart'; // ◀ додано
 
 import 'models/section_model.dart';
 import 'models/user_profile.dart';
@@ -80,7 +80,7 @@ class _PDRAppState extends State<PDRApp> {
       darkTheme: PdrTheme.dark,
       themeMode: _isDark ? ThemeMode.dark : ThemeMode.light,
 
-      home: widget.firstStart ? const SetNameScreen() : const HomeScreen(),
+      home: widget.firstStart ? const SetNameScreen(firstSetup: true) : const HomeScreen(),
 
       routes: {
         "/settings": (_) => SettingsScreen(toggleTheme: toggleTheme, isDark: _isDark),
@@ -89,6 +89,7 @@ class _PDRAppState extends State<PDRApp> {
         "/test": (_) => const TestMenuScreen(),
         "/signs": (_) => const TrafficSignsScreen(),
         "/profile": (_) => const ProfileScreen(),
+        "/set_name": (_) => const SetNameScreen(),       // ◀ маршрут додано
       },
 
       onGenerateRoute: (settings) {
