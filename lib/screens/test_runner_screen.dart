@@ -104,18 +104,36 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
       airaText = _random([
         "Молодець ❤️",
         "Так тримати ⭐",
-        "Я знала, що ти зможеш 😺"
+        "Я знала, що ти зможеш 😺",
+        "Ого, красиво! 🔥",
+        "Ти на правильному шляху 🌿"
       ]);
+
     } else {
       wrongStreak++;
       profile.wrongAnswers++;
 
       if (wrongStreak >= 5) {
         airaImage = "assets/images/aira_angry.gif";
-        airaText = "${q.explanation}\n\nТи хоч стараєшся?";
+        airaText = _random([
+          "${q.explanation}\n\nТи хоч стараєшся?",
+          "${q.explanation}\n\nНу скільки можна? 😾",
+          "${q.explanation}\n\nАйра вже сердиться...",
+          "${q.explanation}\n\nЯ починаю хвилюватись за тебе 😠",
+          "${q.explanation}\n\nСхоже, ти сьогодні воюєш з ПДР 🤨",
+          "${q.explanation}\n\nЩе одна така відповідь — і я піду пити чай 😤"
+        ]);
+
       } else {
         airaImage = "assets/images/aira_sad.gif";
-        airaText = q.explanation ?? "Помилка.";
+        airaText = _random([
+          q.explanation ?? "Помилка.",
+          "${q.explanation}\n\nТрішки помилився... 😿",
+          "${q.explanation}\n\nНе засмучуйся, вийде ще ✨",
+          "${q.explanation}\n\nХух... нічого, наступного разу краще 🫂",
+          "${q.explanation}\n\nАйрі сумно… але я вірю в тебе 💔",
+          "${q.explanation}\n\nНу-у, майже 😔"
+        ]);
       }
     }
 
@@ -134,7 +152,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
   Future<void> _onPressNext() async {
     final q = widget.questions[index];
 
-    // Перше натискання — перевірка
     if (!answered) {
       if (selectedAnswer == null) return;
 
@@ -146,7 +163,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
       return;
     }
 
-    // Друге натискання — наступне питання
     if (index < widget.questions.length - 1) {
       setState(() {
         index++;
