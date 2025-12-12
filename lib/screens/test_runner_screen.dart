@@ -90,6 +90,32 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     super.dispose();
   }
 
+  // ----------------------------------------------------
+  // 🟣 ДІАЛОГ ПІДТВЕРДЖЕННЯ ВИХОДУ
+  // ----------------------------------------------------
+  Future<bool> _confirmExit() async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text("Вийти з тесту?"),
+        content: const Text(
+          "Ваш прогрес буде втрачено. Ви впевнені, що хочете завершити тест?",
+        ),
+        actions: [
+          TextButton(
+            child: const Text("Скасувати"),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          ElevatedButton(
+            child: const Text("Вийти"),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+    ) ??
+        false;
+  }
 
   Future<void> _registerAnswer(bool isCorrect, TestQuestionModel q) async {
     final profile = await UserProfileManager.loadProfile();
@@ -148,7 +174,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
   String _random(List<String> list) =>
       list[Random().nextInt(list.length)];
 
-
   Future<void> _onPressNext() async {
     final q = widget.questions[index];
 
@@ -175,7 +200,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
       _finishTest();
     }
   }
-
 
   Future<void> _finishTest() async {
     timer?.cancel();
@@ -209,28 +233,37 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     final q = widget.questions[index];
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("${widget.title}: ${index + 1}/${widget.questions.length}"),
-        actions: [
-          if (widget.withTimer)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Center(child: Text(_formatTime(timeLeft))),
-            ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          _buildTestUI(q, theme),
-          if (showAira && widget.trainingMode) _buildAira(),
-        ],
+    return WillPopScope(
+      onWillPop: () async => await _confirmExit(),
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              final exit = await _confirmExit();
+              if (exit) Navigator.pop(context);
+            },
+          ),
+          title: Text("${widget.title}: ${index + 1}/${widget.questions.length}"),
+          actions: [
+            if (widget.withTimer)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Center(child: Text(_formatTime(timeLeft))),
+              ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            _buildTestUI(q, theme),
+            if (showAira && widget.trainingMode) _buildAira(),
+          ],
+        ),
       ),
     );
   }
@@ -243,14 +276,11 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
           LinearProgressIndicator(
             value: (index + 1) / widget.questions.length,
           ),
-
           const SizedBox(height: 16),
-
           Align(
             alignment: Alignment.centerLeft,
             child: Text(q.question, style: theme.textTheme.titleLarge),
           ),
-
           if (q.imagePath != null) ...[
             const SizedBox(height: 12),
             ClipRRect(
@@ -258,16 +288,13 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
               child: Image.asset(q.imagePath!),
             ),
           ],
-
           const SizedBox(height: 16),
-
           Expanded(
             child: ListView.builder(
               itemCount: q.answers.length,
               itemBuilder: (_, i) => _buildAnswerTile(q, i, theme),
             ),
           ),
-
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -321,7 +348,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     );
   }
 
-
   Widget _buildAira() {
     return Positioned(
       left: 0,
@@ -363,7 +389,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
       ),
     );
   }
-
 
   String _formatTime(int sec) {
     final m = (sec ~/ 60).toString().padLeft(2, "0");

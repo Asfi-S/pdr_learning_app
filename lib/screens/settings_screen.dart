@@ -23,7 +23,6 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
 
-
           Card(
             child: SwitchListTile(
               title: const Text("Темний режим"),
@@ -38,7 +37,6 @@ class SettingsScreen extends StatelessWidget {
           ),
 
           const SizedBox(height: 16),
-
 
           Card(
             child: ListTile(
@@ -59,20 +57,6 @@ class SettingsScreen extends StatelessWidget {
                     Text("Розроблено Asfinian Studio™ © 2025"),
                   ],
                 );
-              },
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-
-          Card(
-            child: ListTile(
-              leading: Icon(Icons.history, color: theme.colorScheme.primary),
-              title: const Text("Історія проходжень"),
-              subtitle: const Text("Переглянути результати тестів"),
-              onTap: () {
-                Navigator.pushNamed(context, "/history");
               },
             ),
           ),

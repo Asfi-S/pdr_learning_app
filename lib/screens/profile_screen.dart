@@ -33,6 +33,9 @@ class ProfileScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
+                  // -------------------------------
+                  // АВАТАР + ІМ'Я + РІВЕНЬ
+                  // -------------------------------
                   Center(
                     child: Column(
                       children: [
@@ -51,7 +54,7 @@ class ProfileScreen extends StatelessWidget {
                             GestureDetector(
                               onTap: () async {
                                 await Navigator.pushNamed(context, "/set_name");
-                                (context as Element).reassemble(); // оновлення
+                                (context as Element).reassemble();
                               },
                               child: const Icon(Icons.edit, size: 22),
                             ),
@@ -66,6 +69,9 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   const Divider(),
 
+                  // -------------------------------
+                  // СТАТИСТИКА ПРОФІЛЮ
+                  // -------------------------------
                   ListTile(
                     leading: Icon(Icons.emoji_events, color: theme.colorScheme.primary),
                     title: const Text("XP"),
@@ -94,6 +100,25 @@ class ProfileScreen extends StatelessWidget {
                   const Divider(),
                   const SizedBox(height: 12),
 
+                  // -------------------------------
+                  // 🔥 ІСТОРІЯ ПРОХОДЖЕНЬ (перенесено з налаштувань)
+                  // -------------------------------
+                  ListTile(
+                    leading: Icon(Icons.history, color: theme.colorScheme.primary),
+                    title: const Text("Історія проходжень"),
+                    subtitle: const Text("Переглянути результати тестів"),
+                    onTap: () {
+                      Navigator.pushNamed(context, "/history");
+                    },
+                  ),
+
+                  const SizedBox(height: 25),
+                  const Divider(),
+                  const SizedBox(height: 12),
+
+                  // -------------------------------
+                  // ДОСЯГНЕННЯ
+                  // -------------------------------
                   Text(
                     "Досягнення",
                     style: theme.textTheme.titleLarge!.copyWith(
