@@ -90,9 +90,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
     super.dispose();
   }
 
-  // ----------------------------------------------------
-  // 🟣 ДІАЛОГ ПІДТВЕРДЖЕННЯ ВИХОДУ
-  // ----------------------------------------------------
   Future<bool> _confirmExit() async {
     return await showDialog<bool>(
       context: context,
@@ -113,8 +110,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
           ),
         ],
       ),
-    ) ??
-        false;
+    ) ?? false;
   }
 
   Future<void> _registerAnswer(bool isCorrect, TestQuestionModel q) async {
@@ -134,7 +130,6 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
         "Ого, красиво! 🔥",
         "Ти на правильному шляху 🌿"
       ]);
-
     } else {
       wrongStreak++;
       profile.wrongAnswers++;
@@ -146,19 +141,12 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
           "${q.explanation}\n\nНу скільки можна? 😾",
           "${q.explanation}\n\nАйра вже сердиться...",
           "${q.explanation}\n\nЯ починаю хвилюватись за тебе 😠",
-          "${q.explanation}\n\nСхоже, ти сьогодні воюєш з ПДР 🤨",
-          "${q.explanation}\n\nЩе одна така відповідь — і я піду пити чай 😤"
         ]);
-
       } else {
         airaImage = "assets/images/aira_sad.gif";
         airaText = _random([
           q.explanation ?? "Помилка.",
-          "${q.explanation}\n\nТрішки помилився... 😿",
           "${q.explanation}\n\nНе засмучуйся, вийде ще ✨",
-          "${q.explanation}\n\nХух... нічого, наступного разу краще 🫂",
-          "${q.explanation}\n\nАйрі сумно… але я вірю в тебе 💔",
-          "${q.explanation}\n\nНу-у, майже 😔"
         ]);
       }
     }
@@ -181,10 +169,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
       if (selectedAnswer == null) return;
 
       setState(() => answered = true);
-
-      final isCorrect = selectedAnswer == q.correctIndex;
-      await _registerAnswer(isCorrect, q);
-
+      await _registerAnswer(selectedAnswer == q.correctIndex, q);
       return;
     }
 
@@ -250,20 +235,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
             },
           ),
           title: Text("${widget.title}: ${index + 1}/${widget.questions.length}"),
-          actions: [
-            if (widget.withTimer)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Center(child: Text(_formatTime(timeLeft))),
-              ),
-          ],
         ),
-        body: Stack(
-          children: [
-            _buildTestUI(q, theme),
-            if (showAira && widget.trainingMode) _buildAira(),
-          ],
-        ),
+        body: _buildTestUI(q, theme),
       ),
     );
   }
@@ -277,17 +250,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
             value: (index + 1) / widget.questions.length,
           ),
           const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(q.question, style: theme.textTheme.titleLarge),
-          ),
-          if (q.imagePath != null) ...[
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(q.imagePath!),
-            ),
-          ],
+          Text(q.question, style: theme.textTheme.titleLarge),
           const SizedBox(height: 16),
           Expanded(
             child: ListView.builder(
@@ -295,16 +258,15 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
               itemBuilder: (_, i) => _buildAnswerTile(q, i, theme),
             ),
           ),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed:
-              (!answered && selectedAnswer == null) ? null : _onPressNext,
-              child: Text(
-                !answered
-                    ? "Вибрати"
-                    : (index == widget.questions.length - 1 ? "Завершити" : "Далі"),
-              ),
+          ElevatedButton(
+            onPressed:
+            (!answered && selectedAnswer == null) ? null : _onPressNext,
+            child: Text(
+              !answered
+                  ? "Вибрати"
+                  : (index == widget.questions.length - 1
+                  ? "Завершити"
+                  : "Далі"),
             ),
           ),
         ],
@@ -313,8 +275,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
   }
 
   Widget _buildAnswerTile(TestQuestionModel q, int i, ThemeData theme) {
-    final bool isCorrect = answered && i == q.correctIndex;
-    final bool isWrong = answered && selectedAnswer == i && i != q.correctIndex;
+    final isCorrect = answered && i == q.correctIndex;
+    final isWrong = answered && selectedAnswer == i && i != q.correctIndex;
 
     Color tileColor = theme.cardColor;
     Color borderColor = Colors.transparent;
@@ -347,55 +309,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
       ),
     );
   }
-
-  Widget _buildAira() {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 80,
-      child: IgnorePointer(
-        ignoring: true,
-        child: SlideTransition(
-          position: slideAnimation,
-          child: FadeTransition(
-            opacity: fadeAnimation,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 12),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.28),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Image.asset(
-                    airaImage,
-                    width: 70,
-                    height: 70,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      airaText,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatTime(int sec) {
-    final m = (sec ~/ 60).toString().padLeft(2, "0");
-    final s = (sec % 60).toString().padLeft(2, "0");
-    return "$m:$s";
-  }
 }
+
 
 class _ResultScreen extends StatelessWidget {
   final String title;
@@ -412,23 +327,23 @@ class _ResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final percent = (right / total * 100).round();
 
+    final displayPercent = percent < 5 ? 5 : percent;
+
     return Scaffold(
       appBar: AppBar(title: const Text("Результат")),
       body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              Text(title, style: Theme.of(context).textTheme.headlineSmall),
-              const SizedBox(height: 20),
-              SpeedometerResult(percent: percent),
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Повернутися"),
-              ),
-            ],
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(title),
+            const SizedBox(height: 20),
+            SpeedometerResult(percent: displayPercent),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Повернутися"),
+            ),
+          ],
         ),
       ),
     );

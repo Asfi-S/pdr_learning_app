@@ -37,6 +37,12 @@ class PdrTheme {
       tileColor: Colors.white,
     ),
 
+    dividerTheme: DividerThemeData(
+      color: Colors.black.withOpacity(0.08),
+      thickness: 1,
+      space: 24,
+    ),
+
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFFFF7A7A),
@@ -50,6 +56,46 @@ class PdrTheme {
       ),
     ),
 
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(
+          color: Color(0xFFFF6E6E),
+          width: 1.5,
+        ),
+      ),
+    ),
+
+    snackBarTheme: const SnackBarThemeData(
+      backgroundColor: Color(0xFFFF6E6E),
+      contentTextStyle: TextStyle(color: Colors.white),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(14)),
+      ),
+    ),
+
+    dialogTheme: DialogThemeData(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+      ),
+    ),
+
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: Color(0xFFFF6E6E),
+    ),
+
+    iconTheme: const IconThemeData(
+      color: Colors.black87,
+    ),
+
     textTheme: const TextTheme(
       bodyMedium: TextStyle(color: Colors.black87),
       bodyLarge: TextStyle(color: Colors.black, fontSize: 16),
@@ -60,6 +106,7 @@ class PdrTheme {
       ),
     ),
   );
+
 
   static final ThemeData dark = ThemeData(
     useMaterial3: true,
@@ -100,6 +147,12 @@ class PdrTheme {
       tileColor: Color(0xFF1A1A28),
     ),
 
+    dividerTheme: DividerThemeData(
+      color: Colors.white.withOpacity(0.08),
+      thickness: 1,
+      space: 24,
+    ),
+
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF27273A),
@@ -111,6 +164,46 @@ class PdrTheme {
         elevation: 6,
         shadowColor: Colors.black87,
       ),
+    ),
+
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xFF1A1A28),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(
+          color: Color(0xFFFF6E6E),
+          width: 1.5,
+        ),
+      ),
+    ),
+
+    snackBarTheme: const SnackBarThemeData(
+      backgroundColor: Color(0xFF27273A),
+      contentTextStyle: TextStyle(color: Colors.white),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(14)),
+      ),
+    ),
+
+    dialogTheme: DialogThemeData(
+      backgroundColor: const Color(0xFF1A1A28),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+      ),
+    ),
+
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: Color(0xFFFF6E6E),
+    ),
+
+    iconTheme: const IconThemeData(
+      color: Colors.white70,
     ),
 
     textTheme: const TextTheme(

@@ -58,7 +58,7 @@ class _SpeedometerResultState extends State<SpeedometerResult>
           children: [
             SizedBox(
               width: 230,
-              height: 230,
+              height: 160,
               child: CustomPaint(
                 painter: _SpeedometerPainter(
                   percent: current,
@@ -88,9 +88,9 @@ class _SpeedometerResultState extends State<SpeedometerResult>
   }
 
   Color _colorForPercent(double p) {
-    if (p >= 90) return const Color(0xFF6EFF45);
-    if (p >= 60) return Colors.amberAccent.shade200;
-    return Colors.redAccent;
+    if (p >= 90) return const Color(0xFF6EFF45); // зелений
+    if (p >= 60) return const Color(0xFFFFC107); // жовтий
+    return const Color(0xFFFF4B6E); // червоний
   }
 
   String _labelForPercent(double p) {
@@ -112,101 +112,46 @@ class _SpeedometerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 24;
+    final center = Offset(size.width / 2, size.height);
+    final radius = size.width / 2 - 12;
 
-    final startAngle = pi * 0.75;
-    final sweepAngle = pi * 1.5;
+    final startAngle = pi;
+    final sweepAngle = pi;
 
+    final rect = Rect.fromCircle(center: center, radius: radius);
+
+    // 🔹 ФОН
     final bgPaint = Paint()
       ..color = Colors.black12
       ..style = PaintingStyle.stroke
       ..strokeWidth = 18
       ..strokeCap = StrokeCap.round;
 
-    final rect = Rect.fromCircle(center: center, radius: radius);
+    canvas.drawArc(rect, startAngle, sweepAngle, false, bgPaint);
 
-    canvas.drawArc(
-      rect,
-      startAngle,
-      sweepAngle,
-      false,
-      bgPaint,
-    );
-
-    Shader shader;
-    if (percent >= 90) {
-      shader = SweepGradient(
-        startAngle: startAngle,
-        endAngle: startAngle + sweepAngle,
-        colors: [
-          accentColor,
-          accentColor.withOpacity(0.8),
-        ],
-        stops: const [0.0, 0.85],
-        transform: GradientRotation(startAngle),
-      ).createShader(rect);
-    } else {
-      shader = SweepGradient(
-        startAngle: startAngle,
-        endAngle: startAngle + sweepAngle,
-        colors: const [
-          Color(0xFFFF4B6E),
-          Color(0xFFFF8A4D),
-          Color(0xFFFFE46A),
-        ],
-        stops: const [0.0, 0.45, 0.80],
-        transform: GradientRotation(startAngle),
-      ).createShader(rect);
-    }
-
+    // 🔹 КОЛІР ПРОГРЕСУ (БЕЗ ЖОВТОГО СТАРТУ)
     final progressPaint = Paint()
-      ..shader = shader
+      ..color = accentColor
       ..strokeWidth = 18
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.butt;
+      ..strokeCap = StrokeCap.round;
 
     final progressAngle = sweepAngle * (percent / 100);
 
-    canvas.drawArc(
-      rect,
-      startAngle,
-      progressAngle,
-      false,
-      progressPaint,
-    );
+    canvas.drawArc(rect, startAngle, progressAngle, false, progressPaint);
 
+    // 🔹 GLOW
     final glowPaint = Paint()
       ..color = accentColor.withOpacity(0.25)
       ..strokeWidth = 26
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22)
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.butt;
+      ..style = PaintingStyle.stroke;
 
-    canvas.drawArc(
-      rect,
-      startAngle,
-      progressAngle,
-      false,
-      glowPaint,
-    );
+    canvas.drawArc(rect, startAngle, progressAngle, false, glowPaint);
 
-    _drawNeedle(canvas, center, radius, startAngle, sweepAngle);
-
-    canvas.drawCircle(center, 4, Paint()..color = Colors.black26);
-    canvas.drawCircle(center, 2, Paint()..color = accentColor);
-  }
-
-  void _drawNeedle(
-      Canvas canvas,
-      Offset center,
-      double radius,
-      double startAngle,
-      double sweepAngle,
-      ) {
-    final angle = startAngle + sweepAngle * (percent / 100);
-
-    final end = Offset(
+    // 🔹 СТРІЛКА
+    final angle = startAngle + progressAngle;
+    final needleEnd = Offset(
       center.dx + (radius - 12) * cos(angle),
       center.dy + (radius - 12) * sin(angle),
     );
@@ -215,13 +160,17 @@ class _SpeedometerPainter extends CustomPainter {
       ..color = accentColor
       ..strokeWidth = 3;
 
-    final glow = Paint()
+    final needleGlow = Paint()
       ..color = accentColor.withOpacity(0.55)
       ..strokeWidth = 7
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
 
-    canvas.drawLine(center, end, glow);
-    canvas.drawLine(center, end, needle);
+    canvas.drawLine(center, needleEnd, needleGlow);
+    canvas.drawLine(center, needleEnd, needle);
+
+    // 🔹 ЦЕНТР
+    canvas.drawCircle(center, 4, Paint()..color = Colors.black26);
+    canvas.drawCircle(center, 2, Paint()..color = accentColor);
   }
 
   @override
