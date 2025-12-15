@@ -24,6 +24,14 @@ class ProfileScreen extends StatelessWidget {
         if (p.level >= 5) avatar = "assets/images/aira_sad.png";
         if (p.level >= 10) avatar = "assets/images/aira_angry.png";
 
+        final totalAnswers = p.correctAnswers + p.wrongAnswers;
+        final accuracy = totalAnswers == 0
+            ? 0
+            : ((p.correctAnswers / totalAnswers) * 100).round();
+
+        final xpForNextLevel = (p.level + 1) * 100;
+        final xpProgress = (p.xp / xpForNextLevel).clamp(0.0, 1.0);
+
         return Scaffold(
           appBar: AppBar(title: const Text("Профіль користувача")),
           body: Padding(
@@ -33,9 +41,6 @@ class ProfileScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  // -------------------------------
-                  // АВАТАР + ІМ'Я + РІВЕНЬ
-                  // -------------------------------
                   Center(
                     child: Column(
                       children: [
@@ -62,6 +67,19 @@ class ProfileScreen extends StatelessWidget {
                         ),
 
                         Text("Рівень ${p.level}", style: theme.textTheme.bodyLarge),
+
+                        const SizedBox(height: 12),
+
+                        LinearProgressIndicator(
+                          value: xpProgress,
+                          minHeight: 8,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          "До рівня ${p.level + 1}: ${xpForNextLevel - p.xp} XP",
+                          style: theme.textTheme.bodySmall,
+                        ),
                       ],
                     ),
                   ),
@@ -69,9 +87,6 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   const Divider(),
 
-                  // -------------------------------
-                  // СТАТИСТИКА ПРОФІЛЮ
-                  // -------------------------------
                   ListTile(
                     leading: Icon(Icons.emoji_events, color: theme.colorScheme.primary),
                     title: const Text("XP"),
@@ -96,13 +111,39 @@ class ProfileScreen extends StatelessWidget {
                     trailing: Text("${p.testsPassed}"),
                   ),
 
+                  ListTile(
+                    leading: const Icon(Icons.track_changes, color: Colors.orange),
+                    title: const Text("Точність"),
+                    trailing: Text("$accuracy%"),
+                  ),
+
                   const SizedBox(height: 20),
                   const Divider(),
                   const SizedBox(height: 12),
 
-                  // -------------------------------
-                  // 🔥 ІСТОРІЯ ПРОХОДЖЕНЬ (перенесено з налаштувань)
-                  // -------------------------------
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      children: [
+                        Image.asset("assets/images/aira_happy.png", width: 48),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text(
+                            "Айра вірить, що ти складеш іспит 💙\nЩе трохи — і ти готовий!",
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+                  const Divider(),
+                  const SizedBox(height: 12),
+
                   ListTile(
                     leading: Icon(Icons.history, color: theme.colorScheme.primary),
                     title: const Text("Історія проходжень"),
@@ -116,9 +157,6 @@ class ProfileScreen extends StatelessWidget {
                   const Divider(),
                   const SizedBox(height: 12),
 
-                  // -------------------------------
-                  // ДОСЯГНЕННЯ
-                  // -------------------------------
                   Text(
                     "Досягнення",
                     style: theme.textTheme.titleLarge!.copyWith(

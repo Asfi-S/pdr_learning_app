@@ -45,6 +45,15 @@ class HistoryManager {
       ..sort((a, b) => b.date.compareTo(a.date));
   }
 
+  // ----------------------------------------------------
+  // 🆕 ОСТАННІЙ РЕЗУЛЬТАТ
+  // ----------------------------------------------------
+  static Future<HistoryItem?> last() async {
+    final list = await load();
+    if (list.isEmpty) return null;
+    return list.first; // бо список вже відсортований по даті
+  }
+
   static Future<void> add(HistoryItem item) async {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList(_key) ?? [];

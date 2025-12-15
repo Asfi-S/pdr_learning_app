@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   final VoidCallback toggleTheme;
   final bool isDark;
 
@@ -9,6 +9,18 @@ class SettingsScreen extends StatelessWidget {
     required this.toggleTheme,
     required this.isDark,
   });
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+
+  bool soundsEnabled = true;
+  bool vibrationEnabled = true;
+  bool confirmExamExit = true;
+  bool showAira = true;
+  bool animationsEnabled = true;
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +39,122 @@ class SettingsScreen extends StatelessWidget {
             child: SwitchListTile(
               title: const Text("Темний режим"),
               subtitle: const Text("Перемкнути тему застосунку"),
-              value: isDark,
-              onChanged: (_) => toggleTheme(),
+              value: widget.isDark,
+              onChanged: (_) => widget.toggleTheme(),
               secondary: Icon(
-                isDark ? Icons.dark_mode : Icons.light_mode,
+                widget.isDark ? Icons.dark_mode : Icons.light_mode,
                 color: theme.colorScheme.primary,
               ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Card(
+            child: ListTile(
+              leading: Icon(Icons.language, color: theme.colorScheme.primary),
+              title: const Text("Мова застосунку"),
+              subtitle: const Text("Українська"),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Зміна мови буде додана пізніше")),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Card(
+            child: SwitchListTile(
+              title: const Text("Звуки"),
+              subtitle: const Text("Звукові ефекти у тестах"),
+              value: soundsEnabled,
+              onChanged: (v) => setState(() => soundsEnabled = v),
+              secondary: Icon(Icons.volume_up, color: theme.colorScheme.primary),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Card(
+            child: SwitchListTile(
+              title: const Text("Вібрація"),
+              subtitle: const Text("Вібрація при відповіді"),
+              value: vibrationEnabled,
+              onChanged: (v) => setState(() => vibrationEnabled = v),
+              secondary: Icon(Icons.vibration, color: theme.colorScheme.primary),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Card(
+            child: SwitchListTile(
+              title: const Text("Підтвердження виходу з екзамену"),
+              subtitle: const Text("Показувати попередження"),
+              value: confirmExamExit,
+              onChanged: (v) => setState(() => confirmExamExit = v),
+              secondary: Icon(Icons.warning_amber, color: theme.colorScheme.primary),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Card(
+            child: SwitchListTile(
+              title: const Text("Айра"),
+              subtitle: const Text("Показувати персонажа у тренуваннях"),
+              value: showAira,
+              onChanged: (v) => setState(() => showAira = v),
+              secondary: Icon(Icons.face_retouching_natural, color: theme.colorScheme.primary),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Card(
+            child: SwitchListTile(
+              title: const Text("Анімації"),
+              subtitle: const Text("Увімкнути анімації інтерфейсу"),
+              value: animationsEnabled,
+              onChanged: (v) => setState(() => animationsEnabled = v),
+              secondary: Icon(Icons.auto_awesome, color: theme.colorScheme.primary),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Card(
+            child: ListTile(
+              leading: Icon(Icons.delete_outline, color: Colors.redAccent),
+              title: const Text("Очистити історію проходжень"),
+              subtitle: const Text("Видалити всі результати тестів"),
+              onTap: () async {
+                final ok = await showDialog<bool>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text("Очистити історію?"),
+                    content: const Text("Цю дію неможливо скасувати."),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text("Скасувати"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text("Очистити"),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (ok == true) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Історію очищено (поки демо)")),
+                  );
+                }
+              },
             ),
           ),
 

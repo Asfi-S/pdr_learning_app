@@ -38,12 +38,10 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
   bool answered = false;
   bool showAira = false;
 
-  // AIRA state
   String airaImage = "";
   String airaText = "";
   int wrongStreak = 0;
 
-  // AIRA animations
   late AnimationController airaController;
   late Animation<Offset> slideAnimation;
   late Animation<double> fadeAnimation;
@@ -110,7 +108,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
           ),
         ],
       ),
-    ) ?? false;
+    ) ??
+        false;
   }
 
   Future<void> _registerAnswer(bool isCorrect, TestQuestionModel q) async {
@@ -236,7 +235,12 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
           ),
           title: Text("${widget.title}: ${index + 1}/${widget.questions.length}"),
         ),
-        body: _buildTestUI(q, theme),
+        body: Stack(
+          children: [
+            _buildTestUI(q, theme),
+            if (showAira && widget.trainingMode) _buildAira(),
+          ],
+        ),
       ),
     );
   }
@@ -309,8 +313,48 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
       ),
     );
   }
-}
 
+  Widget _buildAira() {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 90,
+      child: IgnorePointer(
+        child: SlideTransition(
+          position: slideAnimation,
+          child: FadeTransition(
+            opacity: fadeAnimation,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.28),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Image.asset(
+                    airaImage,
+                    width: 70,
+                    height: 70,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      airaText,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class _ResultScreen extends StatelessWidget {
   final String title;
@@ -326,7 +370,6 @@ class _ResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final percent = (right / total * 100).round();
-
     final displayPercent = percent < 5 ? 5 : percent;
 
     return Scaffold(
