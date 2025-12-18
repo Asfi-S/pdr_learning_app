@@ -7,6 +7,7 @@ import '../widgets/speedometer_result.dart';
 import '../data/history_manager.dart';
 import '../data/user_profile_manager.dart';
 import '../data/achievements_manager.dart';
+import '../data/settings_manager.dart';
 
 class TestRunnerScreen extends StatefulWidget {
   final String title;
@@ -37,6 +38,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
 
   bool answered = false;
   bool showAira = false;
+  bool airaEnabled = true;
 
   String airaImage = "";
   String airaText = "";
@@ -52,6 +54,11 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
   @override
   void initState() {
     super.initState();
+
+    SettingsManager.isAiraEnabled().then((v) {
+      if (!mounted) return;
+      setState(() => airaEnabled = v);
+    });
 
     timeLeft = widget.timeLimitSeconds ?? 0;
 
@@ -108,8 +115,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
           ),
         ],
       ),
-    ) ??
-        false;
+    ) ?? false;
   }
 
   Future<void> _registerAnswer(bool isCorrect, TestQuestionModel q) async {
@@ -152,7 +158,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
 
     await UserProfileManager.saveProfile(profile);
 
-    if (widget.trainingMode) {
+    if (widget.trainingMode && airaEnabled) {
       setState(() => showAira = true);
       airaController.forward(from: 0);
     }
@@ -238,7 +244,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
         body: Stack(
           children: [
             _buildTestUI(q, theme),
-            if (showAira && widget.trainingMode) _buildAira(),
+            if (showAira && widget.trainingMode && airaEnabled) _buildAira(),
           ],
         ),
       ),

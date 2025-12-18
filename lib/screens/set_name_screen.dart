@@ -4,7 +4,7 @@ import '../data/user_profile_manager.dart';
 import 'home_screen.dart';
 
 class SetNameScreen extends StatefulWidget {
-  final bool firstSetup;
+  final bool firstSetup; 
   const SetNameScreen({super.key, this.firstSetup = false});
 
   @override
