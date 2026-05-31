@@ -163,6 +163,15 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
 
     await UserProfileManager.saveProfile(profile);
 
+    if (mounted) {
+      await AchievementsManager.check(profile, context);
+    }
+
+    if (widget.trainingMode && airaEnabled) {
+      setState(() => showAira = true);
+      airaController.forward(from: 0);
+    }
+
     if (widget.trainingMode && airaEnabled) {
       setState(() => showAira = true);
       airaController.forward(from: 0);
