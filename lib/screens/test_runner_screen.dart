@@ -64,10 +64,15 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
 
     if (widget.withTimer && widget.timeLimitSeconds != null) {
       timer = Timer.periodic(const Duration(seconds: 1), (_) {
-        if (timeLeft <= 0) {
-          _finishTest();
+        if (!mounted) return;
+
+        if (timeLeft > 0) {
+          setState(() {
+            timeLeft--;
+          });
         } else {
-          setState(() => timeLeft--);
+          timer?.cancel();
+          _finishTest();
         }
       });
     }
@@ -239,7 +244,43 @@ class _TestRunnerScreenState extends State<TestRunnerScreen>
               if (exit) Navigator.pop(context);
             },
           ),
-          title: Text("${widget.title}: ${index + 1}/${widget.questions.length}"),
+          titleSpacing: 0,
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  "${widget.title}: ${index + 1}/${widget.questions.length}",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+
+              if (widget.withTimer)
+                Container(
+                  margin: const EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: timeLeft <= 60
+                        ? Colors.red.withOpacity(0.15)
+                        : Colors.orange.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    "${(timeLeft ~/ 60).toString().padLeft(2, '0')}:"
+                        "${(timeLeft % 60).toString().padLeft(2, '0')}",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: timeLeft <= 60
+                          ? Colors.red
+                          : Colors.orange,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
         body: Stack(
           children: [

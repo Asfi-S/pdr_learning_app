@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("ПДР України 2025"),
+        title: const Text("ПДР України 2026"),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                     const SizedBox(height: 22),
                     Text(
-                      "ПДР України 2025",
+                      "ПДР України 2026",
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,

@@ -19,7 +19,7 @@ class TestMenuScreen extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (_) => TestRunnerScreen(
-          title: 'Тренувальний режим',
+          title: '📚 Тренування',
           questions: randomized,
           withTimer: false,
           trainingMode: true,
@@ -41,7 +41,7 @@ class TestMenuScreen extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (_) => TestRunnerScreen(
-          title: 'Екзаменаційний режим',
+          title: '🚦Екзамен',
           questions: randomized,
           withTimer: true,
           trainingMode: false,
@@ -87,26 +87,27 @@ class TestMenuScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Flexible(
-                                child: Text(
-                                  title,
-                                  style: theme.textTheme.titleLarge,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                              Text(
+                                title,
+                                style: theme.textTheme.titleLarge,
                               ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                subtitle,
+                                style: theme.textTheme.bodyMedium!
+                                    .copyWith(color: textDim),
+                              ),
+
                               if (badge != null) ...[
-                                const SizedBox(width: 8),
+                                const SizedBox(height: 8),
                                 badge,
                               ],
                             ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            subtitle,
-                            style: theme.textTheme.bodyMedium!
-                                .copyWith(color: textDim),
                           ),
                         ],
                       ),
@@ -147,9 +148,9 @@ class TestMenuScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 18),
               card(
-                title: 'Тренувальний режим',
+                title: '📚 Тренування',
                 subtitle: 'Всі питання підряд, без таймера',
                 icon: Icons.school_rounded,
                 tap: () => _startTraining(context),
@@ -173,17 +174,30 @@ class TestMenuScreen extends StatelessWidget {
                 builder: (context, snapshot) {
                   if (!snapshot.hasData || snapshot.data == null) {
                     return card(
-                      title: 'Екзаменаційний режим',
+                      title: '🚦Екзамен',
                       subtitle: '20 випадкових питань, з таймером',
                       icon: Icons.timer_rounded,
                       tap: () => _startExam(context),
+                        badge: Container(
+                          padding:
+                          const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            "Для профі!",
+                            style: theme.textTheme.labelSmall!
+                                .copyWith(color: theme.colorScheme.primary),
+                          ),
+                        ),
                     );
                   }
 
                   final last = snapshot.data!;
 
                   return card(
-                    title: 'Екзаменаційний режим',
+                    title: '🚦Екзамен',
                     subtitle: '20 випадкових питань, з таймером',
                     icon: Icons.timer_rounded,
                     tap: () => _startExam(context),

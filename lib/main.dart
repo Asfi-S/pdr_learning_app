@@ -73,7 +73,7 @@ class _PDRAppState extends State<PDRApp> {
     }
 
     return MaterialApp(
-      title: "ПДР України 2025",
+      title: "ПДР України 2026",
       debugShowCheckedModeBanner: false,
 
       theme: PdrTheme.light,
